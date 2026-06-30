@@ -1,0 +1,95 @@
+
+// ============================================================
+// src/features/hazards/hooks.ts
+// ============================================================
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  getActiveHazards, getAllHazards, getHazardById, getMyHazardReports,
+  createHazardReport, updateHazardStatus, deleteHazardReport,
+  uploadHazardPhoto, confirmHazard, removeConfirmation,
+} from './service'
+import type { HazardStatus, HazardType } from '@/types/database'
+
+export const hazardKeys = {
+  active: ['hazards', 'active'] as const,
+  all:    (s?: string) => ['hazards', 'all', s ?? ''] as const,
+  mine:   (uid: string) => ['hazards', 'mine', uid] as const,
+  detail: (id: string) => ['hazards', 'detail', id] as const,
+}
+
+export function useActiveHazards() {
+  return useQuery({ queryKey: hazardKeys.active, queryFn: getActiveHazards })
+}
+
+export function useAllHazards(filter?: HazardStatus) {
+  return useQuery({
+    queryKey: hazardKeys.all(filter),
+    queryFn: () => getAllHazards(filter),
+  })
+}
+
+export function useHazardById(id: string) {
+  return useQuery({
+    queryKey: hazardKeys.detail(id),
+    queryFn:  () => getHazardById(id),
+    enabled:  !!id,
+  })
+}
+
+export function useMyHazardReports(reporterId: string) {
+  return useQuery({
+    queryKey: hazardKeys.mine(reporterId),
+    queryFn:  () => getMyHazardReports(reporterId),
+    enabled:  !!reporterId,
+  })
+}
+
+export function useCreateHazardReport() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (p: Parameters<typeof createHazardReport>[0]) => createHazardReport(p),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: ['hazards'] }),
+  })
+}
+
+export function useUpdateHazardStatus() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: HazardStatus }) =>
+      updateHazardStatus(id, status),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['hazards'] }),
+  })
+}
+
+export function useDeleteHazardReport() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => deleteHazardReport(id),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: ['hazards'] }),
+  })
+}
+
+export function useUploadHazardPhoto() {
+  return useMutation({
+    mutationFn: ({ userId, file }: { userId: string; file: File }) =>
+      uploadHazardPhoto(userId, file),
+  })
+}
+
+export function useConfirmHazard(hazardId: string) {
+  const qc = useQueryClient()
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: hazardKeys.detail(hazardId) })
+    qc.invalidateQueries({ queryKey: ['hazards'] })
+  }
+  const confirm = useMutation({
+    mutationFn: ({ userId, fixed }: { userId: string; fixed: boolean }) =>
+      confirmHazard(hazardId, userId, fixed),
+    onSuccess: invalidate,
+  })
+  const remove = useMutation({
+    mutationFn: (userId: string) => removeConfirmation(hazardId, userId),
+    onSuccess: invalidate,
+  })
+  return { confirm, remove }
+}
