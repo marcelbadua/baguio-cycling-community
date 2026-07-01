@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Profile, Event, MissingBike } from '@/types/database'
 
-const supabase = createClient()
+const supabase = createClient() as any
 
 export interface SearchResults {
   cyclists: Profile[]

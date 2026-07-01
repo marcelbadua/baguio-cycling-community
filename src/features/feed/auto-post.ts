@@ -8,7 +8,7 @@ export async function createMissingBikePost(p: {
   bikeName: string
   lastSeen?: string
 }) {
-  const supabase = createClient()
+  const supabase = createClient() as any
   const content = [
     `🚨 MISSING BIKE ALERT`,
     ``,
@@ -32,7 +32,7 @@ export async function createEventPost(p: {
   eventTitle: string
   eventDate: string
 }) {
-  const supabase = createClient()
+  const supabase = createClient() as any
   await supabase.from('posts').insert({
     author_id: p.authorId,
     post_type: 'event',
@@ -46,7 +46,7 @@ export async function createAnnouncementPost(p: {
   content: string
   pinned?: boolean
 }) {
-  const supabase = createClient()
+  const supabase = createClient() as any
   await supabase.from('posts').insert({
     author_id: p.authorId,
     post_type: 'announcement',

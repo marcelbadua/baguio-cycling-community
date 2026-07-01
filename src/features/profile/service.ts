@@ -4,7 +4,7 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Profile, CyclistType } from '@/types/database'
 
-const supabase = createClient()
+const supabase = createClient() as any
 
 export async function getProfileByUsername(username: string): Promise<Profile | null> {
   const { data } = await supabase

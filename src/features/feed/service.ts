@@ -4,7 +4,7 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Post, Comment } from '@/types/database'
 
-const supabase = createClient()
+const supabase = createClient() as any
 
 const POST_SELECT = `
   *,

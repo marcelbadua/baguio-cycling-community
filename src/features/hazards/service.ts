@@ -4,7 +4,7 @@
 import { createClient } from '@/lib/supabase/client'
 import type { HazardReport, HazardType, HazardStatus } from '@/types/database'
 
-const supabase = createClient()
+const supabase = createClient() as any
 
 const HAZARD_SELECT = `
   *,

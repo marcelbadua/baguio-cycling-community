@@ -4,7 +4,7 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Bike } from '@/types/database'
 
-const supabase = createClient()
+const supabase = createClient() as any
 
 export async function getMyBikes(ownerId: string): Promise<Bike[]> {
   const { data } = await supabase

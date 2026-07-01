@@ -4,7 +4,7 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Profile, Post, Event, HazardReport, MissingBike, UserRole } from '@/types/database'
 
-const supabase = createClient()
+const supabase = createClient() as any
 
 // ── Stats ─────────────────────────────────────────────────────
 

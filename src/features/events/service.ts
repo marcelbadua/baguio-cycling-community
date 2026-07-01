@@ -4,7 +4,7 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Event, EventRsvp, RsvpStatus } from '@/types/database'
 
-const supabase = createClient()
+const supabase = createClient() as any
 
 const EVENT_SELECT = `
   *,

@@ -4,7 +4,7 @@
 import { createClient } from '@/lib/supabase/client'
 import type { MissingBike, MissingBikeStatus } from '@/types/database'
 
-const supabase = createClient()
+const supabase = createClient() as any
 
 const MISSING_SELECT = `
   *,
