@@ -35,7 +35,7 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
   const router = useRouter()
 
   const { data: report, isLoading } = useMissingBikeById(id)
-  const { data: comments } = useMissingBikeComments(id)
+ const { data: comments = [] } = useMissingBikeComments(id) as { data: any[] }
   const markRecovered   = useMarkAsRecovered()
   const uploadPhotos    = useUploadMissingPhotos()
   const updateReport    = useUpdateMissingReport(id)
