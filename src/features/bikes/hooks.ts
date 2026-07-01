@@ -3,6 +3,7 @@
 // src/features/bikes/hooks.ts
 // ============================================================
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { Bike } from '@/types/database'
 import {
   getMyBikes, getBikeById, createBike,
   updateBike, deleteBike, uploadBikePhoto,
