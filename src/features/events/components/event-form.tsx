@@ -58,7 +58,7 @@ export function EventForm({ defaultValues, onSubmit, isPending, submitLabel = 'C
   const [coverPreview, setCoverPreview] = useState<string | null>(defaultValues?.cover_url ?? null)
 
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<EventFormData>({
-    resolver: zodResolver(eventSchema),
+    resolver: zodResolver(eventSchema) as any,
     defaultValues: {
       title:             defaultValues?.title ?? '',
       description:       defaultValues?.description ?? '',
