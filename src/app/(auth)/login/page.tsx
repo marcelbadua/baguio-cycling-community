@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { login, signInWithGoogle, signInWithFacebook } from '@/features/auth/actions'
 import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 
 const schema = z.object({ email: z.string().email(), password: z.string().min(1) })
 type F = z.infer<typeof schema>
@@ -18,6 +20,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const { register, handleSubmit, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema) })
+  const router = useRouter()
+  const queryClient = useQueryClient()
 
   const onSubmit = (data: F) => {
     setError(null)
@@ -25,6 +29,9 @@ export default function LoginPage() {
       const result = await login({ email: data.email, password: data.password })
       if (result?.error) {
         setError(result.error)
+      } else {
+        queryClient.clear()
+        router.push('/feed')
       }
     })
   }

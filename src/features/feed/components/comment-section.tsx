@@ -148,14 +148,9 @@ function CommentItem({
       </div>
       {canDelete && (
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost" size="icon"
-              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 self-start mt-1"
-            >
-              <MoreHorizontal className="h-3.5 w-3.5" />
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger className="inline-flex items-center justify-center h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 self-start mt-1 rounded-md hover:bg-accent outline-none">
+  <MoreHorizontal className="h-3.5 w-3.5" />
+</DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               className="text-destructive text-sm"

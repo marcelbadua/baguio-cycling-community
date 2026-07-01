@@ -90,7 +90,7 @@ export async function getAdminPosts(page = 0, pageSize = 20): Promise<Post[]> {
   const from = page * pageSize
   const { data } = await supabase
     .from('posts')
-    .select('*, author:profiles(id, username, display_name, first_name, last_name, avatar_url)')
+    .select('*, author:profiles!author_id(id, username, display_name, first_name, last_name, avatar_url)')
     .order('created_at', { ascending: false })
     .range(from, from + pageSize - 1)
   return (data ?? []) as Post[]
@@ -120,7 +120,9 @@ export async function getAdminEvents(page = 0, pageSize = 20): Promise<Event[]> 
   const from = page * pageSize
   const { data } = await supabase
     .from('events')
-    .select('*, organizer:profiles(id, username, display_name, first_name, last_name, avatar_url)')
+// getAdminEvents — fix organizer join
+.select('*, organizer:profiles!organizer_id(id, username, display_name, first_name, last_name, avatar_url)')
+
     .order('created_at', { ascending: false })
     .range(from, from + pageSize - 1)
   return (data ?? []) as Event[]
@@ -140,7 +142,9 @@ export async function getAdminHazards(page = 0, pageSize = 20): Promise<HazardRe
   const from = page * pageSize
   const { data } = await supabase
     .from('hazard_reports')
-    .select('*, reporter:profiles(id, username, display_name, first_name, last_name, avatar_url)')
+// getAdminHazards — fix reporter join
+.select('*, reporter:profiles!reporter_id(id, username, display_name, first_name, last_name, avatar_url)')
+
     .order('created_at', { ascending: false })
     .range(from, from + pageSize - 1)
   return (data ?? []) as HazardReport[]
@@ -170,7 +174,8 @@ export async function getAdminMissingBikes(page = 0, pageSize = 20): Promise<Mis
   const from = page * pageSize
   const { data } = await supabase
     .from('missing_bikes')
-    .select('*, bike:bikes(*), owner:profiles(id, username, display_name, first_name, last_name, avatar_url)')
+// getAdminMissingBikes — fix owner join
+.select('*, bike:bikes(*), owner:profiles!owner_id(id, username, display_name, first_name, last_name, avatar_url)')
     .order('created_at', { ascending: false })
     .range(from, from + pageSize - 1)
   return (data ?? []) as MissingBike[]

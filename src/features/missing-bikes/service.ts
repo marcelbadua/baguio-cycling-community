@@ -9,7 +9,7 @@ const supabase = createClient()
 const MISSING_SELECT = `
   *,
   bike:bikes(id, bike_id, nickname, brand, model, year, wheel_size, frame_size, photo_url),
-  owner:profiles(id, username, display_name, first_name, last_name, avatar_url)
+  owner:profiles!owner_id(id, username, display_name, first_name, last_name, avatar_url)
 `
 
 export async function getActiveMissingBikes(): Promise<MissingBike[]> {
@@ -133,7 +133,7 @@ export async function uploadMissingBikePhotos(
 export async function getMissingBikeComments(reportId: string) {
   const { data } = await supabase
     .from('comments')
-    .select('*, author:profiles(id, username, display_name, first_name, last_name, avatar_url)')
+.select('*, author:profiles!author_id(id, username, display_name, first_name, last_name, avatar_url)')
     .eq('missing_bike_id', reportId)
     .eq('is_deleted', false)
     .order('created_at', { ascending: true })
@@ -148,7 +148,8 @@ export async function addMissingBikeComment(payload: {
   const { data, error } = await supabase
     .from('comments')
     .insert(payload)
-    .select('*, author:profiles(id, username, display_name, first_name, last_name, avatar_url)')
+    .select('*, author:profiles!author_id(id, username, display_name, first_name, last_name, avatar_url)')
+
     .single()
   return error ? { error: error.message } : { data }
 }

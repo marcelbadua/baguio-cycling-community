@@ -4,6 +4,7 @@
 export type CyclistType =
   | 'bike_to_work' | 'bike_to_school' | 'leisure' | 'road'
   | 'gravel' | 'mtb' | 'downhill' | 'enduro' | 'bmx' | 'touring' | 'athlete'
+  | 'errand'
 
 export type PostType =
   | 'text' | 'photo' | 'community_update' | 'missing_bike' | 'event' | 'announcement'

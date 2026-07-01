@@ -41,7 +41,6 @@ export async function signUp(input: { email: string; password: string; firstName
 }
 
 export async function login(input: { email: string; password: string }) {
-  // console.log('login received:', input) // debug — remove once confirmed working
   const parsed = loginSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.errors[0].message }
 
@@ -52,7 +51,7 @@ export async function login(input: { email: string; password: string }) {
   })
 
   if (error) return { error: error.message }
-  redirect('/feed')
+  return { success: true }
 }
 
 export async function signInWithGoogle() {
@@ -88,5 +87,5 @@ export async function forgotPassword(input: { email: string }) {
 export async function signOut() {
   const supabase = await createServerSupabaseClient()
   await supabase.auth.signOut()
-  redirect('/login')
+  return { success: true }
 }

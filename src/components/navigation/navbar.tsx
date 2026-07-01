@@ -12,6 +12,7 @@ import {
 import { Home, Calendar, AlertTriangle, Bike, Search, LogOut, Settings, User, Moon, Sun } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTheme } from 'next-themes'
+import { useRouter } from 'next/navigation'
 
 const navItems = [
   { href: '/feed',          icon: Home,          label: 'Feed'    },
@@ -22,9 +23,10 @@ const navItems = [
 ]
 
 export function Navbar() {
-  const { profile } = useAuth()
+  const { user, profile, loading } = useAuth()
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
+  const router = useRouter()
   const initials = [profile?.first_name?.[0], profile?.last_name?.[0]].filter(Boolean).join('').toUpperCase() || '?'
 
   return (
@@ -54,48 +56,56 @@ export function Navbar() {
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 dark:rotate-0 dark:scale-100 transition-all" />
             </button>
 
-            {/* User menu — use div instead of Button asChild to avoid nested button */}
-            <DropdownMenu>
-              <DropdownMenuTrigger className="outline-none">
-                <div className="h-8 w-8 rounded-full cursor-pointer hover:opacity-80 transition-opacity">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={profile?.avatar_url ?? ''} />
-                    <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-                  </Avatar>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium truncate">{profile?.display_name || profile?.username}</p>
-                  <p className="text-xs text-muted-foreground">@{profile?.username}</p>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link className="flex gap-1.5" href={`/profile/${profile?.username}`}>
-                    <User className="mr-2 h-4 w-4" />Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link className="flex gap-1.5" href="/profile/settings">
-                    <Settings className="mr-2 h-4 w-4" />Settings
-                  </Link>
-                </DropdownMenuItem>
-                {profile?.role === 'admin' && (
-                  <DropdownMenuItem asChild>
-                    <Link className="flex gap-1.5" href="/admin">
-                      <Settings className="mr-2 h-4 w-4" />Admin
-                    </Link>
+            {/* Auth section */}
+            {!loading && !user ? (
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => router.push('/login')}>
+                  Sign In
+                </Button>
+                <Button size="sm" onClick={() => router.push('/signup')}>
+                  Sign Up
+                </Button>
+              </div>
+            ) : !loading && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="outline-none">
+                  <div className="h-8 w-8 rounded-full cursor-pointer hover:opacity-80 transition-opacity">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile?.avatar_url ?? ''} />
+                      <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                    </Avatar>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium truncate">{profile?.display_name || profile?.username}</p>
+                    <p className="text-xs text-muted-foreground">@{profile?.username}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push(`/profile/${profile?.username}`)}>
+                    <User className="mr-2 h-4 w-4" /> Profile
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive cursor-pointer"
-                  onSelect={() => signOut()}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuItem onClick={() => router.push('/profile/settings')}>
+                    <Settings className="mr-2 h-4 w-4" /> Settings
+                  </DropdownMenuItem>
+                  {profile?.role === 'admin' && (
+                    <DropdownMenuItem onClick={() => router.push('/admin')}>
+                      <Settings className="mr-2 h-4 w-4" /> Admin
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive cursor-pointer"
+                    onClick={async () => {
+                      await signOut()
+                      router.push('/login')
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : null}
           </div>
         </div>
       </header>

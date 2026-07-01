@@ -19,6 +19,7 @@ const CYCLIST_TYPE_LABELS: Record<CyclistType, string> = {
   bmx:            'BMX',
   touring:        'Touring',
   athlete:        'Athlete',
+  errand:        'Errand',
 }
 
 interface Props {
@@ -56,3 +57,4 @@ export function CyclistTypeSelector({ value, onChange, disabled }: Props) {
 }
 
 export { CYCLIST_TYPE_LABELS }
+

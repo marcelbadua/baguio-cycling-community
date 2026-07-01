@@ -26,16 +26,18 @@ export function getInitials(firstName?: string | null, lastName?: string | null,
   return [firstName?.[0], lastName?.[0]].filter(Boolean).join('').toUpperCase() || fallback
 }
 
-export function getDisplayName(profile: {
+export function getDisplayName(profile?: {
   display_name?: string | null
   first_name?: string | null
   last_name?: string | null
-  username: string
-}) {
+  username?: string | null
+} | null) {
+  if (!profile) return 'Unknown'
   return (
     profile.display_name ||
     [profile.first_name, profile.last_name].filter(Boolean).join(' ') ||
-    profile.username
+    profile.username ||
+    'Unknown'
   )
 }
 

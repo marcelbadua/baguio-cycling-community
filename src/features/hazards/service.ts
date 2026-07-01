@@ -8,7 +8,7 @@ const supabase = createClient()
 
 const HAZARD_SELECT = `
   *,
-  reporter:profiles(id, username, display_name, first_name, last_name, avatar_url),
+  reporter:profiles!reporter_id(id, username, display_name, first_name, last_name, avatar_url),
   confirmed_by_me:hazard_confirmations(user_id)
 `
 

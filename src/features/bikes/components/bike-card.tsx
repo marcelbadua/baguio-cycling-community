@@ -1,6 +1,3 @@
-// ============================================================
-// src/features/bikes/components/bike-card.tsx
-// ============================================================
 'use client'
 
 import { useState } from 'react'
@@ -60,10 +57,8 @@ export function BikeCard({ bike, onEdit, onDelete, onReportMissing, isDeleting }
           {/* Menu */}
           <div className="absolute top-2 right-2">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="secondary" className="h-7 w-7 rounded-full">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
+              <DropdownMenuTrigger className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-secondary hover:bg-secondary/80 transition-colors outline-none">
+                <MoreVertical className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onEdit(bike)}>
@@ -90,13 +85,8 @@ export function BikeCard({ bike, onEdit, onDelete, onReportMissing, isDeleting }
         </div>
 
         <CardContent className="p-4 space-y-2">
-          {/* ID badge */}
           <p className="text-[11px] font-mono text-muted-foreground">{bike.bike_id}</p>
-
-          {/* Name */}
           <h3 className="font-semibold leading-tight truncate">{label}</h3>
-
-          {/* Specs row */}
           <div className="flex flex-wrap gap-1.5">
             {bike.year && (
               <Badge variant="outline" className="text-xs">{bike.year}</Badge>
@@ -108,12 +98,9 @@ export function BikeCard({ bike, onEdit, onDelete, onReportMissing, isDeleting }
               <Badge variant="outline" className="text-xs">Frame {bike.frame_size}</Badge>
             )}
           </div>
-
-          {/* Notes */}
           {bike.notes && (
             <p className="text-xs text-muted-foreground line-clamp-2">{bike.notes}</p>
           )}
-
           <p className="text-xs text-muted-foreground">Added {formatDate(bike.created_at)}</p>
         </CardContent>
       </Card>

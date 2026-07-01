@@ -1,6 +1,3 @@
-// ============================================================
-// src/features/feed/components/post-card.tsx
-// ============================================================
 'use client'
 
 import { useState } from 'react'
@@ -18,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   Heart, MessageCircle, MoreHorizontal,
-  Trash2, AlertTriangle, Pin, ExternalLink,
+  Trash2, Pin, ExternalLink,
 } from 'lucide-react'
 import { formatRelative, getInitials, getDisplayName } from '@/lib/utils'
 import type { Post } from '@/types/database'
@@ -90,10 +87,8 @@ export function PostCard({ post }: Props) {
 
           {(isOwner || isAdmin) && (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+              <DropdownMenuTrigger className="inline-flex items-center justify-center h-7 w-7 shrink-0 rounded-md hover:bg-accent transition-colors outline-none">
+                <MoreHorizontal className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
@@ -120,19 +115,21 @@ export function PostCard({ post }: Props) {
 
         {/* Missing bike ref link */}
         {post.post_type === 'missing_bike' && post.ref_id && (
-          <Link href={`/missing-bikes/${post.ref_id}`}>
-            <Button variant="outline" size="sm" className="gap-1.5 w-full">
-              <ExternalLink className="h-3.5 w-3.5" /> View Missing Bike Report
-            </Button>
+          <Link
+            href={`/missing-bikes/${post.ref_id}`}
+            className="inline-flex items-center justify-center gap-1.5 w-full rounded-md border border-input bg-background px-3 h-9 text-sm hover:bg-accent transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5" /> View Missing Bike Report
           </Link>
         )}
 
         {/* Event ref link */}
         {post.post_type === 'event' && post.ref_id && (
-          <Link href={`/events/${post.ref_id}`}>
-            <Button variant="outline" size="sm" className="gap-1.5 w-full">
-              <ExternalLink className="h-3.5 w-3.5" /> View Event
-            </Button>
+          <Link
+            href={`/events/${post.ref_id}`}
+            className="inline-flex items-center justify-center gap-1.5 w-full rounded-md border border-input bg-background px-3 h-9 text-sm hover:bg-accent transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5" /> View Event
           </Link>
         )}
 

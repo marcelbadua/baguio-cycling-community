@@ -8,7 +8,7 @@ const supabase = createClient()
 
 const POST_SELECT = `
   *,
-  author:profiles(id, username, display_name, first_name, last_name, avatar_url),
+  author:profiles!author_id(id, username, display_name, first_name, last_name, avatar_url),
   liked_by_me:post_likes(user_id)
 `
 
@@ -101,7 +101,7 @@ export async function uploadPostPhotos(userId: string, files: File[]): Promise<s
 export async function getComments(postId: string): Promise<Comment[]> {
   const { data } = await supabase
     .from('comments')
-    .select('*, author:profiles(id, username, display_name, first_name, last_name, avatar_url)')
+    .select('*, author:profiles!author_id(id, username, display_name, first_name, last_name, avatar_url)')
     .eq('post_id', postId)
     .eq('is_deleted', false)
     .order('created_at', { ascending: true })
@@ -116,7 +116,7 @@ export async function addComment(payload: {
   const { data, error } = await supabase
     .from('comments')
     .insert(payload)
-    .select('*, author:profiles(id, username, display_name, first_name, last_name, avatar_url)')
+    .select('*, author:profiles!author_id(id, username, display_name, first_name, last_name, avatar_url)')
     .single()
   return error ? { error: error.message } : { data: data as Comment }
 }

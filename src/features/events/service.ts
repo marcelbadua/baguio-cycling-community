@@ -8,7 +8,7 @@ const supabase = createClient()
 
 const EVENT_SELECT = `
   *,
-  organizer:profiles(id, username, display_name, first_name, last_name, avatar_url),
+  organizer:profiles!organizer_id(id, username, display_name, first_name, last_name, avatar_url),
   my_rsvp:event_rsvps(status)
 `
 
@@ -107,7 +107,6 @@ export async function upsertRsvp(
   const { error } = await supabase
     .from('event_rsvps')
     .upsert({ event_id: eventId, user_id: userId, status, updated_at: new Date().toISOString() })
-  // Update counts
   if (!error) await refreshRsvpCounts(eventId)
   return error ? { error: error.message } : {}
 }
@@ -127,7 +126,7 @@ async function refreshRsvpCounts(eventId: string) {
     .select('status')
     .eq('event_id', eventId)
   if (!data) return
-  const going     = data.filter(r => r.status === 'going').length
+  const going      = data.filter(r => r.status === 'going').length
   const interested = data.filter(r => r.status === 'interested').length
   await supabase
     .from('events')
@@ -138,7 +137,7 @@ async function refreshRsvpCounts(eventId: string) {
 export async function getEventAttendees(eventId: string): Promise<EventRsvp[]> {
   const { data } = await supabase
     .from('event_rsvps')
-    .select('*, user:profiles(id, username, display_name, first_name, last_name, avatar_url)')
+    .select('*, user:profiles!user_id(id, username, display_name, first_name, last_name, avatar_url)')
     .eq('event_id', eventId)
     .order('created_at', { ascending: true })
   return data ?? []
@@ -151,4 +150,3 @@ export async function approveRsvp(eventId: string, userId: string): Promise<{ er
     .match({ event_id: eventId, user_id: userId })
   return error ? { error: error.message } : {}
 }
-
