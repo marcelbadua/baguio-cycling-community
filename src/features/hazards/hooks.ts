@@ -93,3 +93,14 @@ export function useConfirmHazard(hazardId: string) {
   })
   return { confirm, remove }
 }
+
+import { updateHazardReport } from './service'
+
+export function useUpdateHazardReport() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: { description?: string; landmark?: string; barangay?: string } }) =>
+      updateHazardReport(id, updates),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['hazards'] }),
+  })
+}

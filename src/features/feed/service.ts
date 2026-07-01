@@ -128,3 +128,11 @@ export async function deleteComment(id: string): Promise<{ error?: string }> {
     .eq('id', id)
   return error ? { error: error.message } : {}
 }
+
+export async function updatePost(id: string, content: string): Promise<{ error?: string }> {
+  const { error } = await supabase
+    .from('posts')
+    .update({ content, updated_at: new Date().toISOString() })
+    .eq('id', id)
+  return error ? { error: error.message } : {}
+}

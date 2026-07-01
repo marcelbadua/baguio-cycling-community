@@ -118,3 +118,13 @@ export function useDeleteComment(postId: string) {
     },
   })
 }
+
+import { updatePost } from './service'
+
+export function useUpdatePost() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, content }: { id: string; content: string }) => updatePost(id, content),
+    onSuccess: () => qc.invalidateQueries({ queryKey: feedKeys.all }),
+  })
+}

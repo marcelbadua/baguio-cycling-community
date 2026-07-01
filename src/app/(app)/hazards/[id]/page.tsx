@@ -1,7 +1,3 @@
-
-// ============================================================
-// src/app/(app)/hazards/[id]/page.tsx
-// ============================================================
 'use client'
 
 import { use, useState } from 'react'
@@ -9,7 +5,7 @@ import { notFound, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   useHazardById, useConfirmHazard,
-  useUpdateHazardStatus, useDeleteHazardReport,
+  useUpdateHazardStatus, useDeleteHazardReport, useUpdateHazardReport,
 } from '@/features/hazards/hooks'
 import { HAZARD_TYPE_CONFIG } from '@/features/hazards/constants'
 import { useAuth } from '@/features/auth/hooks'
@@ -17,6 +13,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -26,7 +24,7 @@ import {
 import { useToast } from '@/components/ui/use-toast'
 import {
   ArrowLeft, MapPin, Calendar, ThumbsUp,
-  CheckCircle2, Trash2, Loader2, AlertTriangle, ShieldCheck,
+  CheckCircle2, Trash2, Loader2, AlertTriangle, ShieldCheck, Pencil,
 } from 'lucide-react'
 import { formatDate, formatRelative, getInitials, getDisplayName } from '@/lib/utils'
 
@@ -40,9 +38,14 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
   const { confirm, remove }         = useConfirmHazard(id)
   const updateStatus                = useUpdateHazardStatus()
   const deleteReport                = useDeleteHazardReport()
+  const updateReport                = useUpdateHazardReport()
 
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [lightbox, setLightbox]           = useState(false)
+  const [editing, setEditing]             = useState(false)
+  const [editBarangay, setEditBarangay]   = useState('')
+  const [editLandmark, setEditLandmark]   = useState('')
+  const [editDescription, setEditDescription] = useState('')
 
   if (isLoading) return <HazardDetailSkeleton />
   if (!report)   return notFound()
@@ -53,7 +56,6 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
   const isReporter = user?.id === report.reporter_id
   const canManage  = isReporter || isAdmin
 
-  // ── Confirm / un-confirm ──────────────────────────────────
   const handleConfirm = async (fixed: boolean) => {
     if (!user) return
     if (report.confirmed_by_me) {
@@ -62,9 +64,7 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
     } else {
       await confirm.mutateAsync({ userId: user.id, fixed })
       toast({
-        title: fixed
-          ? '✅ Marked as fixed — thanks!'
-          : '👍 Confirmed as still active.',
+        title: fixed ? '✅ Marked as fixed — thanks!' : '👍 Confirmed as still active.',
         description: fixed && (report.confirm_count + 1) >= 3
           ? 'Hazard has been auto-resolved after 3 fixed confirmations.'
           : undefined,
@@ -72,18 +72,40 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
     }
   }
 
-  // ── Manual status toggle (reporter / admin) ────────────────
   const handleStatusToggle = async () => {
     const newStatus = isFixed ? 'active' : 'fixed'
     await updateStatus.mutateAsync({ id, status: newStatus })
     toast({ title: newStatus === 'fixed' ? '✅ Hazard marked as fixed.' : '⚠️ Hazard re-opened.' })
   }
 
-  // ── Delete ─────────────────────────────────────────────────
   const handleDelete = async () => {
     await deleteReport.mutateAsync(id)
     toast({ title: 'Hazard report deleted.' })
     router.push('/hazards')
+  }
+
+  const handleEditOpen = () => {
+    setEditBarangay(report.barangay ?? '')
+    setEditLandmark(report.landmark ?? '')
+    setEditDescription(report.description ?? '')
+    setEditing(true)
+  }
+
+  const handleEditSave = async () => {
+    const result = await updateReport.mutateAsync({
+      id,
+      updates: {
+        barangay:    editBarangay.trim(),
+        landmark:    editLandmark.trim() || undefined,
+        description: editDescription.trim() || undefined,
+      },
+    })
+    if (result?.error) {
+      toast({ title: 'Error', description: result.error, variant: 'destructive' })
+    } else {
+      toast({ title: 'Hazard report updated.' })
+      setEditing(false)
+    }
   }
 
   const confirmPending = confirm.isPending || remove.isPending
@@ -122,7 +144,6 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
         </div>
       )}
 
-      {/* No photo — large type banner */}
       {!report.photo_url && (
         <div className="w-full h-32 rounded-xl bg-muted flex items-center justify-center gap-3">
           <span className="text-5xl">{cfg.emoji}</span>
@@ -144,14 +165,23 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
               </p>
             )}
           </div>
-          <Badge variant={isFixed ? 'secondary' : 'destructive'} className="shrink-0 gap-1">
-            {isFixed
-              ? <><CheckCircle2 className="h-3 w-3" /> Fixed</>
-              : <><AlertTriangle className="h-3 w-3" /> Active</>}
-          </Badge>
+          <div className="flex items-center gap-2 shrink-0">
+            <Badge variant={isFixed ? 'secondary' : 'destructive'} className="gap-1">
+              {isFixed
+                ? <><CheckCircle2 className="h-3 w-3" /> Fixed</>
+                : <><AlertTriangle className="h-3 w-3" /> Active</>}
+            </Badge>
+            {canManage && (
+              <button
+                onClick={handleEditOpen}
+                className="inline-flex items-center justify-center h-7 w-7 rounded-md hover:bg-accent transition-colors outline-none"
+              >
+                <Pencil className="h-4 w-4 text-muted-foreground" />
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Meta */}
         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" />
@@ -260,6 +290,53 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
         </>
       )}
 
+      {/* Edit Dialog */}
+      <Dialog open={editing} onOpenChange={open => !open && setEditing(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Hazard Report</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Barangay</Label>
+              <Input
+                value={editBarangay}
+                onChange={e => setEditBarangay(e.target.value)}
+                placeholder="Barangay name"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Landmark <span className="text-muted-foreground text-xs">(optional)</span></Label>
+              <Input
+                value={editLandmark}
+                onChange={e => setEditLandmark(e.target.value)}
+                placeholder="Nearest landmark"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Description <span className="text-muted-foreground text-xs">(optional)</span></Label>
+              <textarea
+                value={editDescription}
+                onChange={e => setEditDescription(e.target.value)}
+                rows={4}
+                className="w-full rounded-md border bg-muted/50 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                placeholder="Describe the hazard..."
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
+            <Button
+              onClick={handleEditSave}
+              disabled={updateReport.isPending || !editBarangay.trim()}
+            >
+              {updateReport.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirm */}
       <Dialog open={deleteConfirm} onOpenChange={setDeleteConfirm}>
         <DialogContent>
@@ -277,9 +354,7 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
               onClick={handleDelete}
               disabled={deleteReport.isPending}
             >
-              {deleteReport.isPending
-                ? <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                : null}
+              {deleteReport.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Delete
             </Button>
           </DialogFooter>

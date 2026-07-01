@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/features/auth/hooks'
-import { useToggleLike, useDeletePost } from '@/features/feed/hooks'
+import { useToggleLike, useDeletePost, useUpdatePost } from '@/features/feed/hooks'
 import { CommentSection } from './comment-section'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -14,8 +14,12 @@ import {
   DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
+  Dialog, DialogContent, DialogHeader,
+  DialogTitle, DialogFooter,
+} from '@/components/ui/dialog'
+import {
   Heart, MessageCircle, MoreHorizontal,
-  Trash2, Pin, ExternalLink,
+  Trash2, Pin, ExternalLink, Pencil, Loader2,
 } from 'lucide-react'
 import { formatRelative, getInitials, getDisplayName } from '@/lib/utils'
 import type { Post } from '@/types/database'
@@ -33,14 +37,17 @@ interface Props {
 }
 
 export function PostCard({ post }: Props) {
-  const { user, profile, isAdmin } = useAuth()
-  const toggleLike = useToggleLike()
-  const deletePost = useDeletePost()
+  const { user, isAdmin } = useAuth()
+  const toggleLike  = useToggleLike()
+  const deletePost  = useDeletePost()
+  const updatePost  = useUpdatePost()
   const [showComments, setShowComments] = useState(false)
+  const [editing, setEditing]           = useState(false)
+  const [editContent, setEditContent]   = useState(post.content ?? '')
 
   const isOwner = user?.id === post.author_id
-  const author = post.author as any
-  const authorName = author ? getDisplayName(author) : 'Unknown'
+  const author  = post.author as any
+  const authorName     = author ? getDisplayName(author) : 'Unknown'
   const authorInitials = author ? getInitials(author.first_name, author.last_name) : '?'
   const typeInfo = POST_TYPE_LABELS[post.post_type]
 
@@ -49,121 +56,163 @@ export function PostCard({ post }: Props) {
     toggleLike.mutate({ postId: post.id, userId: user.id, liked: !!post.liked_by_me })
   }
 
-  const handleDelete = () => {
-    deletePost.mutate(post.id)
+  const handleDelete = () => deletePost.mutate(post.id)
+
+  const handleEditOpen = () => {
+    setEditContent(post.content ?? '')
+    setEditing(true)
+  }
+
+  const handleEditSave = async () => {
+    if (!editContent.trim()) return
+    await updatePost.mutateAsync({ id: post.id, content: editContent.trim() })
+    setEditing(false)
   }
 
   return (
-    <Card className={cn('overflow-hidden', post.is_pinned && 'ring-1 ring-primary/30')}>
-      <CardContent className="pt-4 space-y-3">
-        {/* Post type badge + pinned */}
-        {(typeInfo || post.is_pinned) && (
-          <div className="flex items-center gap-2">
-            {post.is_pinned && (
-              <div className="flex items-center gap-1 text-xs text-primary font-medium">
-                <Pin className="h-3 w-3" /> Pinned
+    <>
+      <Card className={cn('overflow-hidden', post.is_pinned && 'ring-1 ring-primary/30')}>
+        <CardContent className="pt-4 space-y-3">
+          {/* Post type badge + pinned */}
+          {(typeInfo || post.is_pinned) && (
+            <div className="flex items-center gap-2">
+              {post.is_pinned && (
+                <div className="flex items-center gap-1 text-xs text-primary font-medium">
+                  <Pin className="h-3 w-3" /> Pinned
+                </div>
+              )}
+              {typeInfo && (
+                <Badge variant={typeInfo.color as any} className="text-xs">
+                  {typeInfo.label}
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Author row */}
+          <div className="flex items-start justify-between gap-2">
+            <Link href={`/profile/${author?.username}`} className="flex items-center gap-2.5 group">
+              <Avatar className="h-9 w-9 shrink-0">
+                <AvatarImage src={author?.avatar_url ?? ''} />
+                <AvatarFallback>{authorInitials}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-semibold leading-tight group-hover:underline">{authorName}</p>
+                <p className="text-xs text-muted-foreground">{formatRelative(post.created_at)}</p>
               </div>
-            )}
-            {typeInfo && (
-              <Badge variant={typeInfo.color as any} className="text-xs">
-                {typeInfo.label}
-              </Badge>
+            </Link>
+
+            {(isOwner || isAdmin) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="inline-flex items-center justify-center h-7 w-7 shrink-0 rounded-md hover:bg-accent transition-colors outline-none">
+                  <MoreHorizontal className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {isOwner && (
+                    <DropdownMenuItem onClick={handleEditOpen}>
+                      <Pencil className="mr-2 h-4 w-4" /> Edit Post
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={handleDelete}
+                    disabled={deletePost.isPending}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete Post
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
-        )}
 
-        {/* Author row */}
-        <div className="flex items-start justify-between gap-2">
-          <Link href={`/profile/${author?.username}`} className="flex items-center gap-2.5 group">
-            <Avatar className="h-9 w-9 shrink-0">
-              <AvatarImage src={author?.avatar_url ?? ''} />
-              <AvatarFallback>{authorInitials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-semibold leading-tight group-hover:underline">{authorName}</p>
-              <p className="text-xs text-muted-foreground">{formatRelative(post.created_at)}</p>
-            </div>
-          </Link>
-
-          {(isOwner || isAdmin) && (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center justify-center h-7 w-7 shrink-0 rounded-md hover:bg-accent transition-colors outline-none">
-                <MoreHorizontal className="h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="text-destructive"
-                  onClick={handleDelete}
-                  disabled={deletePost.isPending}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete Post
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* Content */}
+          {post.content && (
+            <p className="text-sm leading-relaxed whitespace-pre-line">{post.content}</p>
           )}
-        </div>
 
-        {/* Content */}
-        {post.content && (
-          <p className="text-sm leading-relaxed whitespace-pre-line">{post.content}</p>
-        )}
+          {/* Photos */}
+          {post.photos && post.photos.length > 0 && (
+            <PhotoGrid photos={post.photos} />
+          )}
 
-        {/* Photos */}
-        {post.photos && post.photos.length > 0 && (
-          <PhotoGrid photos={post.photos} />
-        )}
+          {/* Missing bike ref link */}
+          {post.post_type === 'missing_bike' && post.ref_id && (
+            <Link
+              href={`/missing-bikes/${post.ref_id}`}
+              className="inline-flex items-center justify-center gap-1.5 w-full rounded-md border border-input bg-background px-3 h-9 text-sm hover:bg-accent transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5" /> View Missing Bike Report
+            </Link>
+          )}
 
-        {/* Missing bike ref link */}
-        {post.post_type === 'missing_bike' && post.ref_id && (
-          <Link
-            href={`/missing-bikes/${post.ref_id}`}
-            className="inline-flex items-center justify-center gap-1.5 w-full rounded-md border border-input bg-background px-3 h-9 text-sm hover:bg-accent transition-colors"
-          >
-            <ExternalLink className="h-3.5 w-3.5" /> View Missing Bike Report
-          </Link>
-        )}
+          {/* Event ref link */}
+          {post.post_type === 'event' && post.ref_id && (
+            <Link
+              href={`/events/${post.ref_id}`}
+              className="inline-flex items-center justify-center gap-1.5 w-full rounded-md border border-input bg-background px-3 h-9 text-sm hover:bg-accent transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5" /> View Event
+            </Link>
+          )}
 
-        {/* Event ref link */}
-        {post.post_type === 'event' && post.ref_id && (
-          <Link
-            href={`/events/${post.ref_id}`}
-            className="inline-flex items-center justify-center gap-1.5 w-full rounded-md border border-input bg-background px-3 h-9 text-sm hover:bg-accent transition-colors"
-          >
-            <ExternalLink className="h-3.5 w-3.5" /> View Event
-          </Link>
-        )}
+          {/* Actions bar */}
+          <div className="flex items-center gap-1 pt-1 border-t">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'gap-1.5 text-muted-foreground hover:text-red-500',
+                post.liked_by_me && 'text-red-500'
+              )}
+              onClick={handleLike}
+              disabled={toggleLike.isPending}
+            >
+              <Heart className={cn('h-4 w-4', post.liked_by_me && 'fill-red-500')} />
+              <span className="text-xs">{post.like_count > 0 ? post.like_count : ''}</span>
+            </Button>
 
-        {/* Actions bar */}
-        <div className="flex items-center gap-1 pt-1 border-t">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              'gap-1.5 text-muted-foreground hover:text-red-500',
-              post.liked_by_me && 'text-red-500'
-            )}
-            onClick={handleLike}
-            disabled={toggleLike.isPending}
-          >
-            <Heart className={cn('h-4 w-4', post.liked_by_me && 'fill-red-500')} />
-            <span className="text-xs">{post.like_count > 0 ? post.like_count : ''}</span>
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-muted-foreground"
+              onClick={() => setShowComments(v => !v)}
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-xs">{post.comment_count > 0 ? post.comment_count : ''}</span>
+            </Button>
+          </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 text-muted-foreground"
-            onClick={() => setShowComments(v => !v)}
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span className="text-xs">{post.comment_count > 0 ? post.comment_count : ''}</span>
-          </Button>
-        </div>
+          {/* Comments */}
+          {showComments && <CommentSection postId={post.id} />}
+        </CardContent>
+      </Card>
 
-        {/* Comments */}
-        {showComments && <CommentSection postId={post.id} />}
-      </CardContent>
-    </Card>
+      {/* Edit Dialog */}
+      <Dialog open={editing} onOpenChange={open => !open && setEditing(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Post</DialogTitle>
+          </DialogHeader>
+          <textarea
+            value={editContent}
+            onChange={e => setEditContent(e.target.value)}
+            rows={5}
+            className="w-full rounded-md border bg-muted/50 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+            placeholder="What's on your mind?"
+          />
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
+            <Button
+              onClick={handleEditSave}
+              disabled={updatePost.isPending || !editContent.trim()}
+            >
+              {updatePost.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 

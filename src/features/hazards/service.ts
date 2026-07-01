@@ -252,3 +252,14 @@ export async function removeConfirmation(
 
   return error ? { error: error.message } : {}
 }
+
+export async function updateHazardReport(
+  id: string,
+  updates: { description?: string; landmark?: string; barangay?: string }
+): Promise<{ error?: string }> {
+  const { error } = await supabase
+    .from('hazard_reports')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', id)
+  return error ? { error: error.message } : {}
+}
