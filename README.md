@@ -1,36 +1,265 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚴 Baguio Cycling Community
 
-## Getting Started
+A community-driven Progressive Web App (PWA) built to connect cyclists in Baguio City.
 
-First, run the development server:
+The platform serves as a central hub where cyclists can create profiles, manage a private bike registry, discover local cycling events, stay informed through community posts, report road hazards, and quickly alert the community when a bicycle is lost or stolen.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+This project is intentionally focused on **Baguio City** for its initial release, with a scalable architecture that can support additional cities in the future.
+
+---
+
+## ✨ Features
+
+### 👤 Cyclist Profiles
+
+* Secure authentication
+* Personal profile
+* Profile and cover photos
+* Cyclist type classification
+* Typical daily cycling route
+* Social media links
+
+### 🚲 Private Bike Registry
+
+Maintain a private list of owned bicycles.
+
+Each registered bike includes:
+
+* Unique Bike ID
+* Nickname
+* Brand
+* Model
+* Year
+* Wheel Size
+* Frame Size
+* Photo
+* Notes
+
+Bike information remains private unless the owner reports it as missing.
+
+### 🚨 Missing Bike Alerts
+
+If a bicycle is lost or stolen, the owner can immediately mark it as **Missing**.
+
+The system automatically:
+
+* Creates a Missing Bike record
+* Publishes the alert to the Community Feed
+* Allows additional photos
+* Tracks recovery status
+* Enables community comments and possible sightings
+
+### 📅 Community Events
+
+Create and discover cycling events.
+
+Features include:
+
+* Event details
+* Meeting location
+* Date & time
+* Ride difficulty
+* Estimated distance
+* Elevation
+* Pace
+* RSVP system
+* Participant approval
+
+### 📢 Community Feed
+
+A chronological feed where members can:
+
+* Share updates
+* Upload photos
+* Like posts
+* Comment
+* View automatic announcements for:
+
+  * New events
+  * Missing bike alerts
+  * Community notices
+
+### ⚠️ Road Hazard Reporting
+
+Help improve cycling safety by reporting hazards such as:
+
+* Potholes
+* Open manholes
+* Broken glass
+* Flooding
+* Landslides
+* Road construction
+* Other hazards
+
+Community members can confirm when hazards have been resolved.
+
+### 🔍 Search
+
+Search for:
+
+* Cyclists
+* Events
+* Active Missing Bikes
+
+### 🛠 Admin Dashboard
+
+Administrators can:
+
+* Manage users
+* Moderate posts
+* Moderate events
+* Moderate hazard reports
+* Moderate missing bike reports
+* Remove spam and inappropriate content
+
+---
+
+# 🏗 Technology Stack
+
+## Frontend
+
+* Next.js 15
+* React
+* TypeScript
+* Tailwind CSS
+* shadcn/ui
+
+## Backend
+
+* Supabase
+* PostgreSQL
+* Supabase Authentication
+* Supabase Storage
+* Row Level Security (RLS)
+
+## Additional Libraries
+
+* React Hook Form
+* Zod
+* TanStack Query
+
+## Deployment
+
+* Vercel
+
+---
+
+# 📁 Project Structure
+
+```text
+app/
+features/
+  auth/
+  profile/
+  bikes/
+  events/
+  feed/
+  hazards/
+  missing-bikes/
+  admin/
+components/
+hooks/
+lib/
+services/
+types/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# 🔐 Authentication
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Supported authentication methods:
 
-## Learn More
+* Email & Password
+* Google Sign-In
+* Facebook Login
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 🔒 Privacy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+User bicycles are private by default.
 
-## Deploy on Vercel
+Only the owner can view their registered bikes unless a bike is marked as **Missing**, at which point only the information necessary to help identify and recover the bicycle is made public.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# 🎯 Project Goals
+
+The first release focuses on solving real community needs for cyclists in Baguio:
+
+* Build a trusted cycling community
+* Promote local cycling events
+* Improve rider safety
+* Assist in recovering missing or stolen bicycles
+* Create a centralized information hub for local cyclists
+
+The application intentionally avoids unnecessary complexity during its MVP stage.
+
+---
+
+# 🚀 Future Roadmap
+
+Planned future enhancements include:
+
+* Expansion beyond Baguio City
+* Push notifications
+* Mobile applications
+* Route sharing
+* GPX support
+* Marketplace
+* Organization accounts
+* Advanced moderation tools
+* Public API
+* Analytics dashboard
+
+---
+
+# 🗄 Database
+
+The application uses **Supabase PostgreSQL** with a normalized relational schema.
+
+Core modules include:
+
+* Users
+* Profiles
+* Bikes
+* Missing Bikes
+* Events
+* Posts
+* Comments
+* Reactions
+* Hazard Reports
+* Notifications
+
+All tables implement **Row Level Security (RLS)** to ensure secure access.
+
+---
+
+# 🎨 Design Principles
+
+This project follows several guiding principles:
+
+* Mobile-first responsive design
+* Simple and intuitive user experience
+* Feature-based architecture
+* Clean and maintainable code
+* Accessibility-first components
+* Performance-focused development
+* Secure by default
+
+---
+
+# 🤝 Contributing
+
+Contributions, bug reports, and feature suggestions are welcome.
+
+Before submitting major changes, please open an issue to discuss the proposed improvement.
+
+---
+
+# 📄 License
+
+This project is currently under active development.
+
+A license will be added before the first public release.
