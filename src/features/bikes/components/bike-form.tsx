@@ -43,7 +43,7 @@ export function BikeForm({ defaultValues, onSubmit, isPending, submitLabel = 'Sa
   const [photoPreview, setPhotoPreview] = useState<string | null>(defaultValues?.photo_url ?? null)
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<BikeFormData>({
-    resolver: zodResolver(bikeSchema),
+    resolver: zodResolver(bikeSchema) as any,
     defaultValues: {
       nickname:   defaultValues?.nickname ?? '',
       brand:      defaultValues?.brand ?? '',
