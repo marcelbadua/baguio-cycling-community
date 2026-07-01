@@ -28,7 +28,7 @@ export async function getEvents(filter: 'upcoming' | 'past' | 'all' = 'upcoming'
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  return data.map(e => ({
+return (data as any[]).map((e: any) => ({
     ...e,
     my_rsvp: Array.isArray(e.my_rsvp)
       ? (e.my_rsvp.find((r: any) => r.user_id === user?.id)?.status ?? null)
@@ -60,7 +60,10 @@ export async function getMyEvents(userId: string): Promise<Event[]> {
     .eq('is_deleted', false)
     .order('event_date', { ascending: false })
   if (!data) return []
-  return data.map(e => ({ ...e, my_rsvp: null }))
+return (data as any[]).map((e: any) => ({
+  ...e,
+  my_rsvp: null,
+}))
 }
 
 export async function createEvent(payload: Partial<Event>): Promise<{ data?: Event; error?: string }> {
@@ -126,8 +129,8 @@ async function refreshRsvpCounts(eventId: string) {
     .select('status')
     .eq('event_id', eventId)
   if (!data) return
-  const going      = data.filter(r => r.status === 'going').length
-  const interested = data.filter(r => r.status === 'interested').length
+  const going = (data as any[]).filter((r: any) => r.status === 'going').length
+const interested = (data as any[]).filter((r: any) => r.status === 'interested').length
   await supabase
     .from('events')
     .update({ rsvp_going_count: going, rsvp_interested_count: interested })
