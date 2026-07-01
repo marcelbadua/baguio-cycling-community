@@ -19,7 +19,8 @@ export async function signUp(input: { email: string; password: string; firstName
     return { error: parsed.error.errors[0].message }
   }
 
-  const supabase = await createServerSupabaseClient()
+  //const supabase = await createServerSupabaseClient()
+  const supabase = (await createServerSupabaseClient()) as any
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -45,7 +46,8 @@ export async function login(input: { email: string; password: string }) {
   const parsed = loginSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.errors[0].message }
 
-  const supabase = await createServerSupabaseClient()
+  //const supabase = await createServerSupabaseClient()
+  const supabase = (await createServerSupabaseClient()) as any
   const { error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -56,7 +58,8 @@ export async function login(input: { email: string; password: string }) {
 }
 
 export async function signInWithGoogle() {
-  const supabase = await createServerSupabaseClient()
+  //const supabase = await createServerSupabaseClient()
+  const supabase = (await createServerSupabaseClient()) as any
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback` },
@@ -66,7 +69,8 @@ export async function signInWithGoogle() {
 }
 
 export async function signInWithFacebook() {
-  const supabase = await createServerSupabaseClient()
+  //const supabase = await createServerSupabaseClient()
+  const supabase = (await createServerSupabaseClient()) as any
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'facebook',
     options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback` },
@@ -77,7 +81,8 @@ export async function signInWithFacebook() {
 
 export async function forgotPassword(input: { email: string }) {
   if (!input.email) return { error: 'Email is required' }
-  const supabase = await createServerSupabaseClient()
+  //const supabase = await createServerSupabaseClient()
+  const supabase = (await createServerSupabaseClient()) as any
   const { error } = await supabase.auth.resetPasswordForEmail(input.email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`,
   })
@@ -86,7 +91,8 @@ export async function forgotPassword(input: { email: string }) {
 }
 
 export async function signOut() {
-  const supabase = await createServerSupabaseClient()
+  //const supabase = await createServerSupabaseClient()
+  const supabase = (await createServerSupabaseClient()) as any
   await supabase.auth.signOut()
   redirect('/login')
 }

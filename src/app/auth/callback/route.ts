@@ -12,7 +12,8 @@ export async function GET(req: NextRequest) {
   const next = searchParams.get('next') ?? '/feed'
 
   if (code) {
-    const supabase = await createServerSupabaseClient()
+    //const supabase = await createServerSupabaseClient()
+  const supabase = (await createServerSupabaseClient()) as any
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) return NextResponse.redirect(`${origin}${next}`)
   }
