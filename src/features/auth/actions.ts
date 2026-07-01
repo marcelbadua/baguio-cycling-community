@@ -12,10 +12,10 @@ const signUpSchema = z.object({
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(1) })
 
 export async function signUp(input: { email: string; password: string; firstName: string; lastName: string }) {
-  // console.log('signUp received:', input) // debug — remove once confirmed working
+  console.log('signUp received:', input) // debug — remove once confirmed working
   const parsed = signUpSchema.safeParse(input)
   if (!parsed.success) {
-    // console.log('signUp VALIDATION FAILED:', parsed.error.errors)
+    console.log('signUp VALIDATION FAILED:', parsed.error.errors)
     return { error: parsed.error.errors[0].message }
   }
 
@@ -33,14 +33,15 @@ export async function signUp(input: { email: string; password: string; firstName
     },
   })
 
-  // console.log('SUPABASE SIGNUP DATA:', JSON.stringify(data, null, 2))
-  // console.log('SUPABASE SIGNUP ERROR:', error)
+  console.log('SUPABASE SIGNUP DATA:', JSON.stringify(data, null, 2))
+  console.log('SUPABASE SIGNUP ERROR:', error)
 
   if (error) return { error: error.message }
   return { success: 'Check your email to confirm your account.' }
 }
 
 export async function login(input: { email: string; password: string }) {
+  console.log('login received:', input) // debug — remove once confirmed working
   const parsed = loginSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.errors[0].message }
 
@@ -51,7 +52,7 @@ export async function login(input: { email: string; password: string }) {
   })
 
   if (error) return { error: error.message }
-  return { success: true }
+  redirect('/feed')
 }
 
 export async function signInWithGoogle() {
@@ -60,7 +61,7 @@ export async function signInWithGoogle() {
     provider: 'google',
     options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback` },
   })
-  if (error) return { error: error.message }
+  if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`)
   if (data.url) redirect(data.url)
 }
 
@@ -70,7 +71,7 @@ export async function signInWithFacebook() {
     provider: 'facebook',
     options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback` },
   })
-  if (error) return { error: error.message }
+  if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`)
   if (data.url) redirect(data.url)
 }
 
@@ -87,5 +88,5 @@ export async function forgotPassword(input: { email: string }) {
 export async function signOut() {
   const supabase = await createServerSupabaseClient()
   await supabase.auth.signOut()
-  return { success: true }
+  redirect('/login')
 }
