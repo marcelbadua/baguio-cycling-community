@@ -1,6 +1,3 @@
-// ============================================================
-// src/app/(app)/missing-bikes/[id]/page.tsx
-// ============================================================
 'use client'
 
 import { use, useState, useRef } from 'react'
@@ -24,7 +21,7 @@ import {
 import { useToast } from '@/components/ui/use-toast'
 import {
   AlertTriangle, CheckCircle2, ArrowLeft, MapPin,
-  Calendar, Phone, ImagePlus, X, Send, Loader2,
+  Calendar, Phone, ImagePlus, Send, Loader2,
 } from 'lucide-react'
 import { formatDate, formatRelative, getInitials, getDisplayName } from '@/lib/utils'
 
@@ -35,15 +32,15 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
   const router = useRouter()
 
   const { data: report, isLoading } = useMissingBikeById(id)
- const { data: comments = [] } = useMissingBikeComments(id) as { data: any[] }
-  const markRecovered   = useMarkAsRecovered()
-  const uploadPhotos    = useUploadMissingPhotos()
-  const updateReport    = useUpdateMissingReport(id)
-  const addComment      = useAddMissingBikeComment(id)
+  const { data: comments = [] } = useMissingBikeComments(id)
+  const markRecovered = useMarkAsRecovered()
+  const uploadPhotos  = useUploadMissingPhotos()
+  const updateReport  = useUpdateMissingReport(id)
+  const addComment    = useAddMissingBikeComment(id)
 
   const [recoverConfirm, setRecoverConfirm] = useState(false)
-  const [commentText, setCommentText] = useState('')
-  const [lightbox, setLightbox] = useState<string | null>(null)
+  const [commentText, setCommentText]       = useState('')
+  const [lightbox, setLightbox]             = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   if (isLoading) return <DetailSkeleton />
@@ -59,56 +56,49 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
     ? `${bike.nickname} (${bike?.brand}${bike?.model ? ` ${bike.model}` : ''})`
     : `${bike?.brand ?? ''}${bike?.model ? ` ${bike.model}` : ''}`
 
-  // All photos: bike photo + report photos
   const allPhotos = [
     ...(bike?.photo_url ? [bike.photo_url] : []),
     ...(report.photos ?? []),
   ]
 
-  // ── Recover ──────────────────────────────────────────────
   const handleRecover = async () => {
     const result = await markRecovered.mutateAsync({ reportId: id, bikeId: report.bike_id })
     if (result.error) {
       toast({ title: 'Error', description: result.error, variant: 'destructive' })
     } else {
-      toast({ title: '🎉 Bike marked as recovered!', description: 'Great news for the community.' })
+      toast({ title: '🎉 Bike marked as recovered!' })
       setRecoverConfirm(false)
     }
   }
 
-  // ── Upload additional photos ─────────────────────────────
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
     if (!files.length || !user) return
     const { urls } = await uploadPhotos.mutateAsync({ ownerId: user.id, reportId: id, files })
     if (urls.length) {
-      const updatedPhotos = [...(report.photos ?? []), ...urls]
-      await updateReport.mutateAsync({ photos: updatedPhotos })
+      await updateReport.mutateAsync({ photos: [...(report.photos ?? []), ...urls] })
       toast({ title: `${urls.length} photo(s) added.` })
     }
     if (fileRef.current) fileRef.current.value = ''
   }
 
-  // ── Comment ───────────────────────────────────────────────
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!commentText.trim() || !user) return
     const result = await addComment.mutateAsync({
       missing_bike_id: id,
-      author_id:       user.id,
-      content:         commentText.trim(),
+      author_id: user.id,
+      content: commentText.trim(),
     })
     if (!result.error) setCommentText('')
   }
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Back */}
       <Button variant="ghost" size="sm" onClick={() => router.back()} className="gap-1.5 -ml-2">
         <ArrowLeft className="h-4 w-4" /> Missing Bikes
       </Button>
 
-      {/* Status banner */}
       {isActive ? (
         <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg">
           <AlertTriangle className="h-5 w-5 shrink-0" />
@@ -124,15 +114,12 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
         </div>
       )}
 
-      {/* Photo gallery */}
       {allPhotos.length > 0 && (
         <div className={`grid gap-2 rounded-xl overflow-hidden ${allPhotos.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
           {allPhotos.slice(0, 4).map((src, i) => (
             <div
               key={i}
-              className={`relative overflow-hidden cursor-zoom-in bg-muted ${
-                allPhotos.length === 1 ? 'aspect-video' : 'aspect-square'
-              } ${allPhotos.length === 3 && i === 0 ? 'row-span-2' : ''}`}
+              className={`relative overflow-hidden cursor-zoom-in bg-muted ${allPhotos.length === 1 ? 'aspect-video' : 'aspect-square'} ${allPhotos.length === 3 && i === 0 ? 'row-span-2' : ''}`}
               onClick={() => setLightbox(src)}
             >
               <img src={src} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" alt="" />
@@ -146,7 +133,6 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
         </div>
       )}
 
-      {/* Header */}
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -159,8 +145,6 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
               : <><CheckCircle2 className="h-3 w-3" /> Recovered</>}
           </Badge>
         </div>
-
-        {/* Bike specs */}
         <div className="flex flex-wrap gap-1.5">
           {bike?.year       && <Badge variant="outline">{bike.year}</Badge>}
           {bike?.wheel_size && <Badge variant="outline">{bike.wheel_size}</Badge>}
@@ -170,7 +154,6 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
 
       <Separator />
 
-      {/* Details */}
       <div className="grid sm:grid-cols-2 gap-4">
         <Card>
           <CardContent className="pt-4 space-y-3">
@@ -204,7 +187,6 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
           </CardContent>
         </Card>
 
-        {/* Owner */}
         <Card>
           <CardHeader className="pb-2 pt-4">
             <CardTitle className="text-sm text-muted-foreground font-normal">Reported by</CardTitle>
@@ -220,46 +202,30 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
                 <p className="text-xs text-muted-foreground">@{owner?.username}</p>
               </div>
             </Link>
-            <p className="text-xs text-muted-foreground mt-2">
-              Reported {formatRelative(report.created_at)}
-            </p>
+            <p className="text-xs text-muted-foreground mt-2">Reported {formatRelative(report.created_at)}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Description */}
       {report.description && (
         <div>
           <h2 className="font-semibold mb-2">Description</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-            {report.description}
-          </p>
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{report.description}</p>
         </div>
       )}
 
-      {/* Owner actions */}
       {canManage && isActive && (
         <div className="flex flex-col sm:flex-row gap-3">
           {isOwner && (
             <>
-              <Button
-                variant="outline"
-                className="flex-1 gap-1.5"
-                onClick={() => fileRef.current?.click()}
-                disabled={uploadPhotos.isPending}
-              >
-                {uploadPhotos.isPending
-                  ? <Loader2 className="h-4 w-4 animate-spin" />
-                  : <ImagePlus className="h-4 w-4" />}
+              <Button variant="outline" className="flex-1 gap-1.5" onClick={() => fileRef.current?.click()} disabled={uploadPhotos.isPending}>
+                {uploadPhotos.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
                 Add Photos
               </Button>
               <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
             </>
           )}
-          <Button
-            className="flex-1 gap-1.5 bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => setRecoverConfirm(true)}
-          >
+          <Button className="flex-1 gap-1.5 bg-green-600 hover:bg-green-700 text-white" onClick={() => setRecoverConfirm(true)}>
             <CheckCircle2 className="h-4 w-4" /> Mark as Recovered
           </Button>
         </div>
@@ -267,18 +233,16 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
 
       <Separator />
 
-      {/* Sighting Comments */}
       <div className="space-y-4">
         <h2 className="font-semibold">
           Sightings & Comments{' '}
-          <span className="text-muted-foreground font-normal text-sm">({comments?.length ?? 0})</span>
+          <span className="text-muted-foreground font-normal text-sm">({comments.length})</span>
         </h2>
 
-        {/* Comment list */}
-        {comments && comments.length > 0 ? (
+        {comments.length > 0 ? (
           <div className="space-y-3">
-            {comments.map(comment => {
-              const a = comment.author as any
+            {(comments as any[]).map((comment: any) => {
+              const a = comment.author
               return (
                 <div key={comment.id} className="flex gap-2.5">
                   <Link href={`/profile/${a?.username}`} className="shrink-0">
@@ -294,9 +258,7 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
                       </Link>
                       <p className="text-sm mt-0.5 whitespace-pre-line">{comment.content}</p>
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5 ml-2">
-                      {formatRelative(comment.created_at)}
-                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 ml-2">{formatRelative(comment.created_at)}</p>
                   </div>
                 </div>
               )
@@ -308,15 +270,11 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
           </p>
         )}
 
-        {/* Add comment */}
         <form onSubmit={handleComment} className="flex items-end gap-2 pt-2">
           <Avatar className="h-8 w-8 shrink-0">
-            <AvatarImage src={(user as any)?.avatar_url ?? ''} />
+            <AvatarImage src="" />
             <AvatarFallback className="text-xs">
-              {getInitials(
-                (user?.user_metadata as any)?.given_name,
-                (user?.user_metadata as any)?.family_name
-              )}
+              {getInitials((user?.user_metadata as any)?.given_name, (user?.user_metadata as any)?.family_name)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 relative">
@@ -333,46 +291,32 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
               disabled={!commentText.trim() || addComment.isPending}
               className="absolute right-2.5 bottom-2 text-primary disabled:text-muted-foreground"
             >
-              {addComment.isPending
-                ? <Loader2 className="h-4 w-4 animate-spin" />
-                : <Send className="h-4 w-4" />}
+              {addComment.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </button>
           </div>
         </form>
       </div>
 
-      {/* Recover Confirm Dialog */}
       <Dialog open={recoverConfirm} onOpenChange={setRecoverConfirm}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Mark as Recovered</DialogTitle>
             <DialogDescription>
-              Has your <strong>{bikeName}</strong> been found? Marking it as recovered will remove it
-              from the active missing bikes list and notify the community.
+              Has your <strong>{bikeName}</strong> been found? This will remove it from the active missing bikes list.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setRecoverConfirm(false)}>Cancel</Button>
-            <Button
-              className="bg-green-600 hover:bg-green-700 text-white"
-              onClick={handleRecover}
-              disabled={markRecovered.isPending}
-            >
-              {markRecovered.isPending
-                ? <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                : <CheckCircle2 className="h-4 w-4 mr-2" />}
+            <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleRecover} disabled={markRecovered.isPending}>
+              {markRecovered.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
               Yes, It's Recovered!
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Lightbox */}
       {lightbox && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setLightbox(null)}
-        >
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setLightbox(null)}>
           <img src={lightbox} className="max-w-full max-h-full object-contain rounded-lg" alt="" />
           <button className="absolute top-4 right-4 text-white/80 hover:text-white text-xl" onClick={() => setLightbox(null)}>✕</button>
         </div>
