@@ -28,7 +28,7 @@ export async function getFeedPosts(page = 0, pageSize = 15): Promise<Post[]> {
 
   if (!data) return []
 
-  return data.map(p => ({
+  return (data as any[]).map((p: any) => ({
     ...p,
     liked_by_me: Array.isArray(p.liked_by_me)
       ? p.liked_by_me.some((l: { user_id: string }) => l.user_id === user?.id)
@@ -105,7 +105,7 @@ export async function getComments(postId: string): Promise<Comment[]> {
     .eq('post_id', postId)
     .eq('is_deleted', false)
     .order('created_at', { ascending: true })
-  return data ?? []
+  return (data ?? []) as any
 }
 
 export async function addComment(payload: {

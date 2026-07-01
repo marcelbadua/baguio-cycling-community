@@ -3,6 +3,7 @@
 // src/features/profile/hooks.ts
 // ============================================================
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { Profile } from '@/types/database'
 import {
   getProfileByUsername, getProfileById, updateProfile,
   uploadAvatar, uploadCover,

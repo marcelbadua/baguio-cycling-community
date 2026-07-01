@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input'
 const hazardSchema = z.object({
   hazard_type: z.enum([
     'pothole','open_manhole','broken_glass','construction','landslide','flood','other',
-  ] as const, { required_error: 'Please select a hazard type' }),
+  ] as const, { message: 'Please select a hazard type' }),
   barangay:    z.string().min(1, 'Barangay is required'),
   landmark:    z.string().optional(),
   description: z.string().min(5, 'Please describe the hazard (min 5 characters)'),
