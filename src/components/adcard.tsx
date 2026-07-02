@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 declare global {
   interface Window {
@@ -10,12 +10,21 @@ declare global {
   }
 }
 
-export  function AdCard() {
+export function AdCard() {
+  const adRef = useRef<HTMLModElement>(null);
+
   useEffect(() => {
+    if (!adRef.current) return;
+
+    // Don't initialize twice
+    if (adRef.current.getAttribute("data-adsbygoogle-status")) {
+      return;
+    }
+
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.log("AdSense:", err);
     }
   }, []);
 
@@ -26,6 +35,7 @@ export  function AdCard() {
       </p>
 
       <ins
+        ref={adRef}
         className="adsbygoogle"
         style={{ display: "block" }}
         data-ad-client="ca-pub-4040201528265266"

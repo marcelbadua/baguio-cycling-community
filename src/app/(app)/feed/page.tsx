@@ -14,7 +14,15 @@ import { AdCard } from '@/components/adcard'
 
 function shouldShowAd(index: number) {
   // Show an ad after every 2 posts (testing only)
-  return index > 0 && (index + 1) % 2 === 0
+  //return index > 0 && (index + 1) % 2 === 0
+
+  if (index < 2) return false;
+
+  return (
+    (index + 3) % 7 === 0 ||
+    (index + 5) % 8 === 0
+  );
+  
 }
 
 export default function FeedPage() {
