@@ -10,6 +10,7 @@ import { Toaster }        from '@/components/ui/toaster'
 import { InstallPrompt }  from '@/components/pwa/install-prompt'
 import { OfflineBanner }  from '@/components/pwa/offline-banner'
 import Script from "next/script";
+import { Analytics } from '@vercel/analytics/next'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
@@ -69,7 +70,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4040201528265266"
             crossOrigin="anonymous"
           />
-
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         <Providers>
@@ -78,7 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <InstallPrompt />
           <Toaster />
         </Providers>
-
+        <Analytics />
       </body>
     </html>
   )
