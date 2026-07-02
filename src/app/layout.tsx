@@ -11,6 +11,7 @@ import { InstallPrompt }  from '@/components/pwa/install-prompt'
 import { OfflineBanner }  from '@/components/pwa/offline-banner'
 import Script from "next/script";
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
