@@ -52,6 +52,7 @@ export default function EventsPage() {
     }
 
     // Upload cover if provided
+    let coverUrl: string | undefined
     if (coverFile && result.data) {
       const coverResult = await uploadCover.mutateAsync({
         userId: user.id,
@@ -59,6 +60,7 @@ export default function EventsPage() {
         file: coverFile,
       })
       if (coverResult.url) {
+        coverUrl = coverResult.url
         // update event with cover url (fire and forget)
         await fetch('/api/events/update-cover', {
           method: 'POST',
@@ -67,14 +69,22 @@ export default function EventsPage() {
       }
     }
 
-    // Auto-post to feed
+    // Auto-post to feed (carries the event's cover image along, if one was uploaded)
     if (result.data) {
-      await createEventPost({
+      const postResult = await createEventPost({
         authorId: user.id,
         eventId: result.data.id,
         eventTitle: result.data.title,
         eventDate: formatDate(result.data.event_date),
-      }).catch(() => {})
+        coverUrl,
+      })
+      if (postResult.error) {
+        toast({
+          title: 'Event created, but feed post failed',
+          description: postResult.error,
+          variant: 'destructive',
+        })
+      }
     }
 
     toast({ title: '🗓️ Event created!', description: 'It has been posted to the community feed.' })

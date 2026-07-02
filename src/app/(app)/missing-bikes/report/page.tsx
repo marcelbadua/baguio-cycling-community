@@ -1,4 +1,3 @@
-
 // ============================================================
 // src/app/(app)/missing-bikes/report/page.tsx
 // ============================================================
@@ -47,6 +46,7 @@ function ReportPageContent() {
     }
 
     // 2. Upload photos and attach to report
+    let allPhotos: string[] = bike.photo_url ? [bike.photo_url] : []
     if (photoFiles.length > 0) {
       const { urls } = await uploadPhotos.mutateAsync({
         ownerId:  user.id,
@@ -55,7 +55,7 @@ function ReportPageContent() {
       })
       if (urls.length > 0) {
         // Attach photo URLs to the report
-        const allPhotos = [...(bike.photo_url ? [bike.photo_url] : []), ...urls]
+        allPhotos = [...allPhotos, ...urls]
         await fetch('/api/missing-bikes/update-photos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -64,18 +64,27 @@ function ReportPageContent() {
       }
     }
 
-    // 3. Auto-post to community feed
+    // 3. Auto-post to community feed (carries the report's photos along, if any)
+    // 3. Auto-post to community feed (carries the report's photos along, if any)
     const bikeName = bike.nickname
       ? `${bike.nickname} (${bike.brand}${bike.model ? ` ${bike.model}` : ''})`
       : `${bike.brand}${bike.model ? ` ${bike.model}` : ''}`
 
-    await createMissingBikePost({
+    const postResult = await createMissingBikePost({
       authorId:      user.id,
       missingBikeId: result.data.id,
       bikeName,
       lastSeen:      data.last_seen_location,
-    }).catch(() => {})
+      photos:        allPhotos,
+    })
 
+    if (postResult.error) {
+      toast({
+        title: 'Report saved, but feed post failed',
+        description: postResult.error,
+        variant: 'destructive',
+      })
+    }
     toast({
       title: '🚨 Missing bike report submitted!',
       description: 'The community has been alerted. We hope your bike is found soon.',
