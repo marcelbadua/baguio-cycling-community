@@ -7,7 +7,8 @@ export async function createMissingBikePost(p: {
   missingBikeId: string
   bikeName: string
   lastSeen?: string
-}) {
+  photos?: string[]
+}): Promise<{ error?: string }> {
   const supabase = createClient() as any
   const content = [
     `🚨 MISSING BIKE ALERT`,
@@ -18,12 +19,16 @@ export async function createMissingBikePost(p: {
     `If you have information, view the full report and leave a comment.`,
   ].filter(Boolean).join('\n')
 
-  await supabase.from('posts').insert({
+  const { error } = await supabase.from('posts').insert({
     author_id: p.authorId,
     post_type: 'missing_bike',
     content,
     ref_id: p.missingBikeId,
+    photos: p.photos ?? [],
   })
+
+  if (error) console.error('createMissingBikePost failed:', error.message)
+  return error ? { error: error.message } : {}
 }
 
 export async function createEventPost(p: {
@@ -31,26 +36,34 @@ export async function createEventPost(p: {
   eventId: string
   eventTitle: string
   eventDate: string
-}) {
+  coverUrl?: string | null
+}): Promise<{ error?: string }> {
   const supabase = createClient() as any
-  await supabase.from('posts').insert({
+  const { error } = await supabase.from('posts').insert({
     author_id: p.authorId,
     post_type: 'event',
     content: `🗓️ NEW EVENT: ${p.eventTitle}\n\nA new cycling event has been posted for ${p.eventDate}.\nCheck it out and RSVP!`,
     ref_id: p.eventId,
+    photos: p.coverUrl ? [p.coverUrl] : [],
   })
+
+  if (error) console.error('createEventPost failed:', error.message)
+  return error ? { error: error.message } : {}
 }
 
 export async function createAnnouncementPost(p: {
   authorId: string
   content: string
   pinned?: boolean
-}) {
+}): Promise<{ error?: string }> {
   const supabase = createClient() as any
-  await supabase.from('posts').insert({
+  const { error } = await supabase.from('posts').insert({
     author_id: p.authorId,
     post_type: 'announcement',
     content: p.content,
     is_pinned: p.pinned ?? false,
   })
+
+  if (error) console.error('createAnnouncementPost failed:', error.message)
+  return error ? { error: error.message } : {}
 }

@@ -83,12 +83,24 @@ export async function updateEvent(id: string, updates: Partial<Event>): Promise<
   return error ? { error: error.message } : {}
 }
 
-export async function deleteEvent(id: string): Promise<{ error?: string }> {
-  const { error } = await supabase
-    .from('events')
+export async function deleteEvent(id: string) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  console.log("Current user:", user)
+
+  const { data, error, status } = await supabase
+    .from("events")
     .update({ is_deleted: true })
-    .eq('id', id)
-  return error ? { error: error.message } : {}
+    .eq("id", id)
+    .select()
+
+  console.log("Status:", status)
+  console.log("Data:", data)
+  console.log("Error:", error)
+
+  return { error: error?.message }
 }
 
 export async function uploadEventCover(
