@@ -67,10 +67,23 @@ export async function createPost(payload: {
 }
 
 export async function deletePost(id: string): Promise<{ error?: string }> {
-  const { error } = await supabase
-    .from('posts')
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  console.log("User:", user)
+  console.log("User error:", userError)
+
+  const { data, error } = await supabase
+    .from("posts")
     .update({ is_deleted: true })
-    .eq('id', id)
+    .eq("id", id)
+    .select()
+
+  console.log("Update result:", data)
+  console.log("Update error:", error)
+
   return error ? { error: error.message } : {}
 }
 

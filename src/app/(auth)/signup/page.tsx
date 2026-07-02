@@ -45,7 +45,7 @@ export default function SignupPage() {
 
   if (success) return (
     <Card><CardContent className="pt-6 text-center space-y-2">
-      <p className="text-lg font-semibold">Check your email</p>
+      <p className="text-lg font-semibold">Thank you for signing up!</p>
       <p className="text-muted-foreground text-sm">{success}</p>
       <Link href="/login"><Button variant="link">Back to Login</Button></Link>
     </CardContent></Card>

@@ -46,12 +46,20 @@ export function useCreatePost(authorId: string) {
 
 export function useDeletePost() {
   const qc = useQueryClient()
+
   return useMutation({
-    mutationFn: (id: string) => deletePost(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: feedKeys.all }),
+    mutationFn: deletePost,
+
+    onSuccess: (result) => {
+      if (result.error) {
+        console.error(result.error)
+        return
+      }
+
+      qc.invalidateQueries({ queryKey: feedKeys.all })
+    },
   })
 }
-
 export function useToggleLike() {
   const qc = useQueryClient()
   return useMutation({
