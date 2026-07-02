@@ -58,7 +58,7 @@ function LeftSidebar() {
                 </p>
               )}
             </div>
-            <div className="flex gap-4 pt-1 border-t w-full justify-around">
+            {/* <div className="flex gap-4 pt-1 border-t w-full justify-around">
               <div className="text-center">
                 <p className="font-bold text-sm">—</p>
                 <p className="text-xs text-muted-foreground">Posts</p>
@@ -71,16 +71,16 @@ function LeftSidebar() {
                 <p className="font-bold text-sm">—</p>
                 <p className="text-xs text-muted-foreground">KMs</p>
               </div>
-            </div>
+            </div> */}
           </div>
-          <Button className="w-full gap-2" size="sm">
+          {/* <Button className="w-full gap-2" size="sm">
             <ImagePlus className="h-4 w-4" /> Create Post
-          </Button>
+          </Button> */}
         </CardContent>
       </Card>
 
       {/* Trending Topics */}
-      <Card>
+      {/* <Card>
         <CardContent className="p-4 space-y-2">
           <h3 className="font-semibold text-sm">Trending Topics</h3>
           {trending.map(tag => (
@@ -90,7 +90,7 @@ function LeftSidebar() {
           ))}
           <button className="text-xs text-primary hover:underline">See all</button>
         </CardContent>
-      </Card>
+      </Card> */}
     </aside>
   )
 }
