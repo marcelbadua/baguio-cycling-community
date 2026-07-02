@@ -56,7 +56,7 @@ export async function signUp(input: {
   }
 
   return {
-    success: 'Check your email to confirm your account.',
+    success: 'Go to login.',
   }
 }
 
