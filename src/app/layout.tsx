@@ -9,6 +9,7 @@ import { Providers }      from '@/components/providers'
 import { Toaster }        from '@/components/ui/toaster'
 import { InstallPrompt }  from '@/components/pwa/install-prompt'
 import { OfflineBanner }  from '@/components/pwa/offline-banner'
+import Script from "next/script";
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4040201528265266" crossorigin="anonymous"></script>
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         <Providers>
