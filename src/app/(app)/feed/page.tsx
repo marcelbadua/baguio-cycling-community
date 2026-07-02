@@ -11,6 +11,8 @@ import { RightSidebar } from '@/features/feed/components/right-sidebar'
 import { PostComposer } from '@/features/feed/components/feed-composer'
 import { PostCard } from '@/features/feed/components/feed-post-card'
 
+import { AdCard } from '@/components/adcard'
+
 // ── Feed Page ─────────────────────────────────────────────────
 export default function FeedPage() {
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage, refetch } = useFeedPosts()
@@ -51,7 +53,17 @@ export default function FeedPage() {
             </Card>
           ))
         ) : posts.length > 0 ? (
-          posts.map(post => <PostCard key={post.id} post={post} />)
+          <>
+            {posts.map((post, index) => (
+              <div key={post.id} className="space-y-4">
+                <PostCard post={post} />
+
+                {((index + 1) === 3 || ((index + 1) > 3 && (index - 2) % 5 === 0)) && (
+                  <AdCard />
+                )}
+              </div>
+            ))}
+          </>
         ) : (
           <div className="text-center py-24 space-y-3">
             <p className="text-4xl">🚴</p>
