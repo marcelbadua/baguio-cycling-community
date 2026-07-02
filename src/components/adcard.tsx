@@ -39,7 +39,7 @@ export function AdCard() {
         className="adsbygoogle"
         style={{ display: "block" }}
         data-ad-client="ca-pub-4040201528265266"
-        data-ad-slot="1234567890"
+        data-ad-slot="6937182664"
         data-ad-format="auto"
         data-full-width-responsive="true"
       />
