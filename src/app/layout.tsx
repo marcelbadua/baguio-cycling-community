@@ -80,6 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Toaster />
         </Providers>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
