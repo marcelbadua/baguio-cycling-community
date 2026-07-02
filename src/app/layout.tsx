@@ -35,6 +35,7 @@ export const metadata: Metadata = {
     description: 'The community hub for cyclists in Baguio City',
   },
   keywords: ['cycling', 'baguio', 'biking', 'community', 'MTB', 'road bike', 'Cordillera'],
+  
 }
 
 export const viewport: Viewport = {
@@ -57,13 +58,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-        <meta name="google-adsense-account" content="ca-pub-4040201528265266"></meta>
-        <Script
-  async
-  strategy="afterInteractive"
-  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4040201528265266"
-  crossOrigin="anonymous"
-/>
+
+          <meta
+            name="google-adsense-account"
+            content="ca-pub-4040201528265266"
+          />
+
+          <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4040201528265266"
+            crossOrigin="anonymous"
+          />
+
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         <Providers>
@@ -72,6 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <InstallPrompt />
           <Toaster />
         </Providers>
+
       </body>
     </html>
   )
