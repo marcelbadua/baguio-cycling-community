@@ -11,8 +11,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuth } from '@/features/auth/hooks'
-import { useUpdateProfile } from '@/features/profile/hooks'
+import { useUpdateProfile, useUploadAvatar } from '@/features/profile/hooks'
 import { CyclistTypeSelector } from '@/features/profile/components/cyclist-type-selector'
+import { AvatarUpload } from '@/features/profile/components/avatar-upload'
+import { useToast } from '@/components/ui/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,9 +22,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Loader2, ChevronRight, ChevronLeft } from 'lucide-react'
+import { getInitials } from '@/lib/utils'
 import type { CyclistType } from '@/types/database'
 
-const STEPS = ['Welcome', 'Your Info', 'Cyclist Type', 'Done']
+const STEPS = ['Welcome', 'Your Info', 'Cyclist Type', 'Usual Route', 'Photo & Socials', 'Done']
 
 const step1Schema = z.object({
   username:     z.string().min(3).regex(/^[a-z0-9_]+$/, 'Lowercase, numbers, underscores only'),
@@ -34,6 +37,18 @@ const step1Schema = z.object({
 })
 type Step1Data = z.infer<typeof step1Schema>
 
+const routeSchema = z.object({
+  daily_route: z.string().max(300).optional(),
+})
+type RouteData = z.infer<typeof routeSchema>
+
+const step4Schema = z.object({
+  facebook_url:  z.string().url('Enter a full URL').optional().or(z.literal('')),
+  instagram_url: z.string().url('Enter a full URL').optional().or(z.literal('')),
+  strava_url:    z.string().url('Enter a full URL').optional().or(z.literal('')),
+})
+type Step4Data = z.infer<typeof step4Schema>
+
 const BARANGAY_SAMPLE = [
   'Session Road Area', 'Burnham-Legarda', 'Aurora Hill Proper', 'Irisan',
   'Bakakeng Central', 'Camp 7', 'Trancoville', 'Engineers Hill',
@@ -41,11 +56,13 @@ const BARANGAY_SAMPLE = [
 ]
 
 export default function OnboardingPage() {
-  const { user, profile } = useAuth()
+  const { user, profile, refetchProfile } = useAuth()
   const router = useRouter()
+  const { toast } = useToast()
   const [step, setStep] = useState(0)
   const [cyclistTypes, setCyclistTypes] = useState<CyclistType[]>([])
   const updateProfile = useUpdateProfile(user?.id ?? '')
+  const uploadAvatar = useUploadAvatar(user?.id ?? '')
 
   const { register, handleSubmit, formState: { errors } } = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),
@@ -57,17 +74,76 @@ export default function OnboardingPage() {
     },
   })
 
-  const onStep1Submit = (data: Step1Data) => {
-    updateProfile.mutate(data)
+  const {
+    register: registerRoute,
+    handleSubmit: handleRouteSubmit,
+  } = useForm<RouteData>({
+    resolver: zodResolver(routeSchema),
+    defaultValues: {
+      daily_route: profile?.daily_route ?? '',
+    },
+  })
+
+  const {
+    register: registerStep4,
+    handleSubmit: handleStep4Submit,
+    formState: { errors: step4Errors },
+  } = useForm<Step4Data>({
+    resolver: zodResolver(step4Schema),
+    defaultValues: {
+      facebook_url:  profile?.facebook_url ?? '',
+      instagram_url: profile?.instagram_url ?? '',
+      strava_url:    profile?.strava_url ?? '',
+    },
+  })
+
+  const onStep1Submit = async (data: Step1Data) => {
+    const result = await updateProfile.mutateAsync(data)
+    if (result.error) {
+      toast({ title: 'Could not save', description: result.error, variant: 'destructive' })
+      return
+    }
     setStep(2)
   }
 
+  const onRouteSubmit = async (data: RouteData) => {
+    const result = await updateProfile.mutateAsync({ daily_route: data.daily_route || null })
+    if (result.error) {
+      toast({ title: 'Could not save', description: result.error, variant: 'destructive' })
+      return
+    }
+    setStep(4)
+  }
+
+  const onStep4Submit = async (data: Step4Data) => {
+    const result = await updateProfile.mutateAsync({
+      facebook_url:  data.facebook_url || null,
+      instagram_url: data.instagram_url || null,
+      strava_url:    data.strava_url || null,
+    })
+    if (result.error) {
+      toast({ title: 'Could not save', description: result.error, variant: 'destructive' })
+      return
+    }
+    setStep(5)
+  }
+
   const finish = async () => {
-    await updateProfile.mutateAsync({ cyclist_types: cyclistTypes })
+    const result = await updateProfile.mutateAsync({ cyclist_types: cyclistTypes, onboarding_completed: true })
+    if (result.error) {
+      toast({
+        title: 'Could not finish onboarding',
+        description: result.error,
+        variant: 'destructive',
+      })
+      return
+    }
+    await refetchProfile()
     router.push('/feed')
   }
 
   const progress = ((step + 1) / STEPS.length) * 100
+  const initials = getInitials(profile?.first_name, profile?.last_name)
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -190,8 +266,97 @@ export default function OnboardingPage() {
           </Card>
         )}
 
-        {/* Step 3 — Done */}
+        {/* Step 3 — Usual Route */}
         {step === 3 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>What's your usual route?</CardTitle>
+              <CardDescription>
+                Tell the community the route you ride most often — helps others recognize you out on the road.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleRouteSubmit(onRouteSubmit)} className="space-y-4">
+                <div className="space-y-1">
+                  <Label>Typical Daily Route <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                  <Textarea
+                    {...registerRoute('daily_route')}
+                    placeholder="e.g. Session Road to Camp John Hay loop"
+                    rows={3}
+                    className="resize-none"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1">
+                    <ChevronLeft className="mr-1 h-4 w-4" /> Back
+                  </Button>
+                  <Button type="submit" className="flex-1" disabled={updateProfile.isPending}>
+                    {updateProfile.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Next <ChevronRight className="ml-1 h-4 w-4" /></>}
+                  </Button>
+                </div>
+                <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => setStep(4)}>
+                  Skip this step
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 4 — Photo & Socials */}
+        {step === 4 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Add a photo & socials</CardTitle>
+              <CardDescription>All optional — you can skip and add these later in Settings.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleStep4Submit(onStep4Submit)} className="space-y-4">
+                <div className="flex justify-center py-2">
+                  <AvatarUpload
+                    currentUrl={profile?.avatar_url}
+                    initials={initials}
+                    isPending={uploadAvatar.isPending}
+                    onUpload={async (file) => {
+                      const result = await uploadAvatar.mutateAsync(file)
+                      if (result.error) {
+                        toast({ title: 'Photo upload failed', description: result.error, variant: 'destructive' })
+                      }
+                    }}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Facebook</Label>
+                  <Input {...registerStep4('facebook_url')} placeholder="https://facebook.com/yourname" />
+                  {step4Errors.facebook_url && <p className="text-xs text-destructive">{step4Errors.facebook_url.message}</p>}
+                </div>
+                <div className="space-y-1">
+                  <Label>Instagram</Label>
+                  <Input {...registerStep4('instagram_url')} placeholder="https://instagram.com/yourname" />
+                  {step4Errors.instagram_url && <p className="text-xs text-destructive">{step4Errors.instagram_url.message}</p>}
+                </div>
+                <div className="space-y-1">
+                  <Label>Strava</Label>
+                  <Input {...registerStep4('strava_url')} placeholder="https://strava.com/athletes/..." />
+                  {step4Errors.strava_url && <p className="text-xs text-destructive">{step4Errors.strava_url.message}</p>}
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => setStep(3)} className="flex-1">
+                    <ChevronLeft className="mr-1 h-4 w-4" /> Back
+                  </Button>
+                  <Button type="submit" className="flex-1" disabled={updateProfile.isPending}>
+                    {updateProfile.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Next <ChevronRight className="ml-1 h-4 w-4" /></>}
+                  </Button>
+                </div>
+                <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => setStep(5)}>
+                  Skip this step
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 5 — Done */}
+        {step === 5 && (
           <Card>
             <CardHeader>
               <CardTitle>You're all set! 🎉</CardTitle>
@@ -201,9 +366,9 @@ export default function OnboardingPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>✅ Add a profile photo in Settings</li>
                 <li>✅ Register your bikes in My Bikes</li>
                 <li>✅ Join or create a cycling event</li>
+                <li>✅ Explore the community feed</li>
               </ul>
               <Button className="w-full mt-2" onClick={finish} disabled={updateProfile.isPending}>
                 {updateProfile.isPending

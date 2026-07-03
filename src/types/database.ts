@@ -34,6 +34,7 @@ export interface Profile {
   daily_route: string | null
   role: UserRole
   is_active: boolean
+  onboarding_completed: boolean
   created_at: string
   updated_at: string
 }

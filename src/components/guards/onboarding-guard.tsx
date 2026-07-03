@@ -20,8 +20,10 @@ export function OnboardingGuard({ children }: { children: React.ReactNode }) {
     if (!user) return
     if (SKIP_PATHS.some(p => pathname.startsWith(p))) return
 
-    // Redirect to onboarding if profile is missing required fields
-    const isIncomplete = !profile?.first_name || !profile?.last_name
+    // Redirect to onboarding until the wizard has been explicitly completed.
+    // (Not inferred from first_name/last_name — email signup already collects
+    // those, so that check alone let users skip the rest of the wizard.)
+    const isIncomplete = !profile?.onboarding_completed
     if (isIncomplete) router.replace('/onboarding')
   }, [user, profile, loading, pathname, router])
 

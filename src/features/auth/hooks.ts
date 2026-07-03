@@ -1,5 +1,14 @@
 'use client'
 
+// ============================================================
+// src/features/auth/hooks.ts
+// Thin re-export over the shared AuthProvider context, so every
+// component reads/writes the SAME user/profile state instead of
+// each call to useAuth() fetching its own independent copy.
+// ============================================================
+
+export { useAuthContext as useAuth } from './auth-provider'
+
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
@@ -86,5 +95,6 @@ export function useAuth() {
     profile,
     loading,
     isAdmin: profile?.role === 'admin',
+    refetchProfile: () => (user ? fetchProfile(user.id) : Promise.resolve()),
   }
 }

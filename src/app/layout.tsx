@@ -12,6 +12,7 @@ import { OfflineBanner }  from '@/components/pwa/offline-banner'
 import Script from "next/script";
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Footer } from "@/components/layout/footer";
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
@@ -76,11 +77,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <OfflineBanner />
           {children}
+
+          <Footer />
+          
           <InstallPrompt />
           <Toaster />
         </Providers>
         <Analytics />
         <SpeedInsights />
+
       </body>
     </html>
   )
