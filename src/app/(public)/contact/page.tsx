@@ -23,7 +23,7 @@ export default function ContactPage() {
                         </p>
 
                         <p className="mt-2">
-                            📧 thirdkraft@gmail.com
+                            📧 thirdkraft+baguiocyclingcommunityapp@gmail.com
                         </p>
                     </div>
 
