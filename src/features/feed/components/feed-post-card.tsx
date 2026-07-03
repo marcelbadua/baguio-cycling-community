@@ -38,7 +38,7 @@ export function PostCard({ post }: { post: Post }) {
 
   const router = useRouter()
 
-  const { user, isAdmin } = useAuth()
+  const { user, profile, isAdmin } = useAuth()
   const toggleLike = useToggleLike()
   const deletePost = useDeletePost()
   const [showComments, setShowComments] = useState(false)
@@ -69,11 +69,11 @@ export function PostCard({ post }: { post: Post }) {
 
   const [showAllComments, setShowAllComments] = useState(false)
 
-const commentsPreview = post.comments ?? []
+  const commentsPreview = post.comments ?? []
 
-const visibleComments = showAllComments
-  ? commentsPreview
-  : commentsPreview.slice(0, 2)
+  const visibleComments = showAllComments
+    ? commentsPreview
+    : commentsPreview.slice(0, 2)
 
   return (
     <Card className={cn('overflow-hidden', post.is_pinned && 'ring-1 ring-primary/40')}>
@@ -255,47 +255,47 @@ const visibleComments = showAllComments
             Share
           </button>
         </div>
-{/* Preview Comments */}
-{!showComments && commentsPreview.length > 0 && (
-  <div className="px-4 py-3 space-y-3">
-    {commentsPreview.slice(0, 2).map((comment: any) => {
-      const a = comment.author
+        {/* Preview Comments */}
+        {!showComments && commentsPreview.length > 0 && (
+          <div className="px-4 py-3 space-y-3">
+            {commentsPreview.slice(0, 2).map((comment: any) => {
+              const a = comment.author
 
-      return (
-        <div key={comment.id} className="flex gap-2">
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarImage src={a?.avatar_url ?? ''} />
-            <AvatarFallback className="text-xs">
-              {getInitials(a?.first_name, a?.last_name)}
-            </AvatarFallback>
-          </Avatar>
+              return (
+                <div key={comment.id} className="flex gap-2">
+                  <Avatar className="h-8 w-8 shrink-0">
+                    <AvatarImage src={a?.avatar_url ?? ''} />
+                    <AvatarFallback className="text-xs">
+                      {getInitials(a?.first_name, a?.last_name)}
+                    </AvatarFallback>
+                  </Avatar>
 
-          <div className="flex-1">
-            <div className="bg-muted rounded-2xl px-3 py-2">
-              <p className="text-xs font-semibold">
-                {a ? getDisplayName(a) : 'Unknown'}
-              </p>
-              <p className="text-sm">{comment.content}</p>
-            </div>
+                  <div className="flex-1">
+                    <div className="bg-muted rounded-2xl px-3 py-2">
+                      <p className="text-xs font-semibold">
+                        {a ? getDisplayName(a) : 'Unknown'}
+                      </p>
+                      <p className="text-sm">{comment.content}</p>
+                    </div>
 
-            <p className="text-[10px] text-muted-foreground mt-0.5 ml-2">
-              {formatRelative(comment.created_at)}
-            </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 ml-2">
+                      {formatRelative(comment.created_at)}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+
+            {commentsPreview.length > 1 && (
+              <button
+                onClick={() => setShowComments(true)}
+                className="text-xs text-muted-foreground hover:text-primary ml-10"
+              >
+                View all {commentsPreview.length + 1} comments
+              </button>
+            )}
           </div>
-        </div>
-      )
-    })}
-
-    {commentsPreview.length > 1 && (
-      <button
-        onClick={() => setShowComments(true)}
-        className="text-xs text-muted-foreground hover:text-primary ml-10"
-      >
-        View all {commentsPreview.length + 1} comments
-      </button>
-    )}
-  </div>
-)}
+        )}
         {/* Comments */}
         {showComments && (
           <div className="px-4 py-3 space-y-3">
@@ -318,10 +318,12 @@ const visibleComments = showAllComments
               )
             })}
             {user ? (
-              <form onSubmit={handleComment} className="flex gap-2 items-end">
+              <form onSubmit={handleComment} className="flex gap-2">
                 <Avatar className="h-8 w-8 shrink-0">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="text-xs">?</AvatarFallback>
+                  <AvatarImage src={profile?.avatar_url ?? ""} />
+                  <AvatarFallback className="text-xs">
+                    {getInitials(profile?.first_name, profile?.last_name)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 relative">
                   <textarea value={commentText} onChange={e => setCommentText(e.target.value)}

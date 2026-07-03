@@ -90,7 +90,7 @@ export function PostComposer() {
             onChange={e => setContent(e.target.value)}
             onFocus={() => setFocused(true)}
             rows={focused ? 3 : 1}
-            className="resize-none border-0 shadow-none focus-visible:ring-0 p-0 text-sm"
+            className="resize-none border-0 shadow-none focus-visible:ring-0 p-0 text-sm p-2"
           />
         </div>
 
