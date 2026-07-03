@@ -134,7 +134,7 @@ export function EventForm({ defaultValues, onSubmit, isPending, submitLabel = 'C
       </div>
 
       {/* Date & Time */}
-      <div className="grid grid-cols-2 gap-4">
+      
         <div className="space-y-1">
           <Label>Date *</Label>
           <Input {...register('event_date')} type="date" />
@@ -144,7 +144,7 @@ export function EventForm({ defaultValues, onSubmit, isPending, submitLabel = 'C
           <Label>Time</Label>
           <Input {...register('event_time')} type="time" />
         </div>
-      </div>
+      
 
       {/* Meeting Point */}
       <div className="space-y-1">
