@@ -15,30 +15,77 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Footer } from "@/components/layout/footer";
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
-
 export const metadata: Metadata = {
-  title:       { default: 'Baguio Cycling Community', template: '%s | BCC' },
-  description: 'The community hub for cyclists in Baguio City',
-  manifest:    '/manifest.json',
+  metadataBase: new URL("https://baguio-cycling-community.vercel.app"),
+
+  title: {
+    default: "Baguio Cycling Community",
+    template: "%s | BCC",
+  },
+
+  description:
+    "Join the Baguio Cycling Community. Share rides, discover events, report road hazards, post missing bike alerts, and connect with cyclists across Baguio City.",
+
+  applicationName: "Baguio Cycling Community",
+
+  manifest: "/manifest.json",
+
+  keywords: [
+    "cycling",
+    "baguio",
+    "biking",
+    "community",
+    "MTB",
+    "road bike",
+    "Cordillera",
+    "cycling events",
+    "bike community",
+    "missing bike",
+    "road hazards",
+  ],
+
+  alternates: {
+    canonical: "/",
+  },
+
   appleWebApp: {
-    capable:         true,
-    statusBarStyle:  'default',
-    title:           'BCC',
-    startupImage:    '/icons/apple-touch-icon.png',
+    capable: true,
+    statusBarStyle: "default",
+    title: "BCC",
+    startupImage: "/icons/apple-touch-icon.png",
   },
+
   icons: {
-    apple:   '/icons/apple-touch-icon.png',
-    icon:    '/icons/icon-192x192.png',
-    shortcut:'/icons/icon-192x192.png',
+    apple: "/icons/apple-touch-icon.png",
+    icon: "/icons/icon-192x192.png",
+    shortcut: "/icons/icon-192x192.png",
   },
+
   openGraph: {
-    type:        'website',
-    siteName:    'Baguio Cycling Community',
-    title:       'Baguio Cycling Community',
-    description: 'The community hub for cyclists in Baguio City',
+    type: "website",
+    locale: "en_PH",
+    url: "https://baguio-cycling-community.vercel.app",
+    siteName: "Baguio Cycling Community",
+    title: "Baguio Cycling Community",
+    description:
+      "Join the Baguio Cycling Community. Share rides, discover events, report road hazards, post missing bike alerts, and connect with cyclists across Baguio City.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Baguio Cycling Community",
+      },
+    ],
   },
-  keywords: ['cycling', 'baguio', 'biking', 'community', 'MTB', 'road bike', 'Cordillera'],
-  
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Baguio Cycling Community",
+    description:
+      "Join the Baguio Cycling Community. Share rides, discover events, report road hazards, post missing bike alerts, and connect with cyclists across Baguio City.",
+    images: ["/og-image.png"],
+  },
 }
 
 export const viewport: Viewport = {
