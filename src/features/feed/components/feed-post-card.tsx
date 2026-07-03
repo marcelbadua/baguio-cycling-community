@@ -69,9 +69,11 @@ export function PostCard({ post }: { post: Post }) {
 
   const [showAllComments, setShowAllComments] = useState(false)
 
-  const visibleComments = showAllComments
-  ? post.comments
-  : post.comments?.slice(0, 2)
+const commentsPreview = post.comments ?? []
+
+const visibleComments = showAllComments
+  ? commentsPreview
+  : commentsPreview.slice(0, 2)
 
   return (
     <Card className={cn('overflow-hidden', post.is_pinned && 'ring-1 ring-primary/40')}>
@@ -254,9 +256,9 @@ export function PostCard({ post }: { post: Post }) {
           </button>
         </div>
 {/* Preview Comments */}
-            {!showComments && post.comments?.length > 0 && (
+{!showComments && commentsPreview.length > 0 && (
   <div className="px-4 py-3 space-y-3">
-    {post.comments.slice(0, 2).map((comment: any) => {
+    {commentsPreview.slice(0, 2).map((comment: any) => {
       const a = comment.author
 
       return (
@@ -284,12 +286,12 @@ export function PostCard({ post }: { post: Post }) {
       )
     })}
 
-    {post.comments.length > 1 && (
+    {commentsPreview.length > 1 && (
       <button
         onClick={() => setShowComments(true)}
         className="text-xs text-muted-foreground hover:text-primary ml-10"
       >
-        View all {post.comments.length + 1} comments
+        View all {commentsPreview.length + 1} comments
       </button>
     )}
   </div>
