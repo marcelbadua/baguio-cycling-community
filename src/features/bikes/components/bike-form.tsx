@@ -88,7 +88,7 @@ export function BikeForm({ defaultValues, onSubmit, isPending, submitLabel = 'Sa
   }
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5 px-4 mb-6">
       {/* Photo Upload */}
       <div className="space-y-2">
         <Label>Bike Photo</Label>
@@ -159,9 +159,9 @@ export function BikeForm({ defaultValues, onSubmit, isPending, submitLabel = 'Sa
           <Label>Wheel Size</Label>
           <select
             {...register('wheel_size')}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-9 w-full rounded-md border border-input bg-background text-foreground  px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="">Select...</option>
+            <option value="" className="bg-background text-foreground">Select...</option>
             {WHEEL_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
@@ -169,9 +169,9 @@ export function BikeForm({ defaultValues, onSubmit, isPending, submitLabel = 'Sa
           <Label>Frame Size</Label>
           <select
             {...register('frame_size')}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="">Select...</option>
+            <option value="" className="bg-background text-foreground">Select...</option>
             {FRAME_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
