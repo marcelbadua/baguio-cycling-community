@@ -5,6 +5,11 @@ import Link from 'next/link'
 import { useAuth } from '@/features/auth/hooks'
 import { useToggleLike, useDeletePost, useComments, useAddComment } from '@/features/feed/hooks'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+
+import { useRouter } from 'next/navigation'
+
+import { ImageLightbox } from '@/components/media/image-lightbox'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -17,12 +22,15 @@ import type { Post } from '@/types/database'
 // ── Post Type Badge ───────────────────────────────────────────
 const TYPE_CONFIG: Record<string, { label: string; icon: ReactNode; badge: string }> = {
   missing_bike: { label: 'Missing Bike Alert', icon: <Bike className="h-4 w-4" />, badge: 'bg-purple-600 text-white' },
-  event:        { label: 'New Event',          icon: <Calendar className="h-4 w-4" />, badge: 'bg-blue-600 text-white' },
-  announcement: { label: 'Announcement',       icon: <Pin className="h-4 w-4" />, badge: 'bg-primary text-primary-foreground' },
+  event: { label: 'New Event', icon: <Calendar className="h-4 w-4" />, badge: 'bg-blue-600 text-white' },
+  announcement: { label: 'Announcement', icon: <Pin className="h-4 w-4" />, badge: 'bg-primary text-primary-foreground' },
 }
 
 // ── Post Card ─────────────────────────────────────────────────
 export function PostCard({ post }: { post: Post }) {
+
+  const router = useRouter()
+
   const { user, isAdmin } = useAuth()
   const toggleLike = useToggleLike()
   const deletePost = useDeletePost()
@@ -36,6 +44,11 @@ export function PostCard({ post }: { post: Post }) {
   const authorName = author ? getDisplayName(author) : 'Unknown'
   const authorInitials = author ? getInitials(author.first_name, author.last_name) : '?'
   const isOwner = user?.id === post.author_id
+
+  const requireLogin = () => {
+    router.push('/login')
+  }
+
   const typeCfg = TYPE_CONFIG[post.post_type]
 
   const handleComment = async (e: FormEvent) => {
@@ -44,6 +57,8 @@ export function PostCard({ post }: { post: Post }) {
     await addComment.mutateAsync({ post_id: post.id, author_id: user.id, content: commentText.trim() })
     setCommentText('')
   }
+
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   return (
     <Card className={cn('overflow-hidden', post.is_pinned && 'ring-1 ring-primary/40')}>
@@ -72,24 +87,33 @@ export function PostCard({ post }: { post: Post }) {
               </div>
             </div>
           </Link>
-          <div className="relative">
-            <button onClick={() => setShowMenu(v => !v)} className="p-1.5 rounded-full hover:bg-muted transition-colors">
-              <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
-            </button>
-            {showMenu && (isOwner || isAdmin) && (
-              <div className="absolute right-0 top-8 bg-card border rounded-lg shadow-lg z-10 py-1 min-w-32">
-                <button onClick={() => { deletePost.mutate(post.id); setShowMenu(false) }}
-                  className="w-full px-3 py-1.5 text-sm text-destructive hover:bg-muted text-left">
-                  Delete Post
-                </button>
-              </div>
-            )}
-          </div>
+          {(isOwner || isAdmin) && (
+            <div className="relative">
+              <button onClick={() => setShowMenu(v => !v)} className="p-1.5 rounded-full hover:bg-muted transition-colors">
+                <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
+              </button>
+              {showMenu && (isOwner || isAdmin) && (
+                <div className="absolute right-0 top-8 bg-card border rounded-lg shadow-lg z-10 py-1 min-w-32">
+                  <button onClick={() => { deletePost.mutate(post.id); setShowMenu(false) }}
+                    className="w-full px-3 py-1.5 text-sm text-destructive hover:bg-muted text-left">
+                    Delete Post
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Content */}
         {post.content && (
-          <p className="px-4 pb-3 text-sm leading-relaxed whitespace-pre-line">{post.content}</p>
+          <Link
+            href={`/posts/${post.id}`}
+            className="block hover:bg-muted/30 transition-colors"
+          >
+            <p className="px-4 pb-3 text-sm leading-relaxed whitespace-pre-line cursor-pointer">
+              {post.content}
+            </p>
+          </Link>
         )}
 
         {/* Photos */}
@@ -97,7 +121,18 @@ export function PostCard({ post }: { post: Post }) {
           <div className={`grid gap-0.5 ${post.photos.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
             {post.photos.slice(0, 4).map((src, i) => (
               <div key={i} className={`relative overflow-hidden bg-muted ${post.photos.length === 1 ? 'aspect-video' : 'aspect-square'}`}>
-                <img src={src} className="w-full h-full object-cover" alt="" />
+
+                <div
+                  onClick={() => setLightboxIndex(i)}
+                  className="cursor-pointer w-full h-full"
+                >
+                  <img
+                    src={src}
+                    className="w-full h-full object-cover hover:opacity-95 transition"
+                    alt=""
+                  />
+                </div>
+
                 {i === 3 && post.photos.length > 4 && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                     <span className="text-white text-xl font-bold">+{post.photos.length - 4}</span>
@@ -151,18 +186,58 @@ export function PostCard({ post }: { post: Post }) {
         {/* Action buttons */}
         <div className="flex items-center border-b mx-4">
           <button
-            onClick={() => user && toggleLike.mutate({ postId: post.id, userId: user.id, liked: !!post.liked_by_me })}
+
+            onClick={() => {
+              if (!user) {
+                requireLogin()
+                return
+              }
+
+              toggleLike.mutate({
+                postId: post.id,
+                userId: user.id,
+                liked: !!post.liked_by_me,
+              })
+            }}
+
             className={cn('flex-1 flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-muted text-sm font-medium transition-colors', post.liked_by_me ? 'text-primary' : 'text-muted-foreground')}
           >
             <ThumbsUp className={cn('h-4 w-4', post.liked_by_me && 'fill-primary')} />
             Like
           </button>
-          <button onClick={() => setShowComments(v => !v)}
+          <button
+
+            onClick={() => {
+              if (!user) {
+                requireLogin()
+                return
+              }
+
+              setShowComments(v => !v)
+            }}
+
             className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-muted text-sm font-medium text-muted-foreground transition-colors">
             <MessageCircle className="h-4 w-4" /> Comment
           </button>
-          <button className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-muted text-sm font-medium text-muted-foreground transition-colors">
-            <Share2 className="h-4 w-4" /> Share
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/posts/${post.id}`
+
+              if (navigator.share) {
+                navigator.share({
+                  title: 'Baguio Cycling Community Post',
+                  text: post.content?.slice(0, 100) || 'Check out this post',
+                  url,
+                })
+              } else {
+                navigator.clipboard.writeText(url)
+                alert('Post link copied to clipboard')
+              }
+            }}
+            className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-muted text-sm font-medium text-muted-foreground transition-colors"
+          >
+            <Share2 className="h-4 w-4" />
+            Share
           </button>
         </div>
 
@@ -187,24 +262,59 @@ export function PostCard({ post }: { post: Post }) {
                 </div>
               )
             })}
-            <form onSubmit={handleComment} className="flex gap-2 items-end">
-              <Avatar className="h-8 w-8 shrink-0">
-                <AvatarImage src="" />
-                <AvatarFallback className="text-xs">?</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 relative">
-                <textarea value={commentText} onChange={e => setCommentText(e.target.value)}
-                  placeholder="Write a comment…" rows={1}
-                  className="w-full rounded-2xl border bg-muted px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring pr-9"
-                  style={{ minHeight: '36px' }} />
-                <button type="submit" disabled={!commentText.trim() || addComment.isPending}
-                  className="absolute right-2.5 bottom-2 text-primary disabled:text-muted-foreground">
-                  {addComment.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <span className="text-xs font-semibold">Post</span>}
-                </button>
+            {user ? (
+              <form onSubmit={handleComment} className="flex gap-2 items-end">
+                <Avatar className="h-8 w-8 shrink-0">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="text-xs">?</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 relative">
+                  <textarea value={commentText} onChange={e => setCommentText(e.target.value)}
+                    placeholder="Write a comment…" rows={1}
+                    className="w-full rounded-2xl border bg-muted px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring pr-9"
+                    style={{ minHeight: '36px' }} />
+                  <button type="submit" disabled={!commentText.trim() || addComment.isPending}
+                    className="absolute right-2.5 bottom-2 text-primary disabled:text-muted-foreground">
+                    {addComment.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <span className="text-xs font-semibold">Post</span>}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="rounded-xl border bg-muted/40 p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Sign in to join the conversation.
+                </p>
+
+                <Button asChild size="sm">
+                  <Link href="/login">
+                    Log in
+                  </Link>
+                </Button>
               </div>
-            </form>
+            )}
           </div>
         )}
+
+        {lightboxIndex !== null && post.photos && (
+          <ImageLightbox
+            images={post.photos}
+            index={lightboxIndex}
+            onClose={() => setLightboxIndex(null)}
+            onNext={() =>
+              setLightboxIndex((i) =>
+                i === null ? 0 : (i + 1) % post.photos.length
+              )
+            }
+            onPrev={() =>
+              setLightboxIndex((i) =>
+                i === null
+                  ? 0
+                  : (i - 1 + post.photos.length) % post.photos.length
+              )
+            }
+          />
+        )}
+
       </CardContent>
     </Card>
   )

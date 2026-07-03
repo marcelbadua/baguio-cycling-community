@@ -1,6 +1,9 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+
+import { useAuth } from '@/features/auth/hooks'
+
 import { useFeedPosts } from '@/features/feed/hooks'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,8 +16,14 @@ import { PostCard } from '@/features/feed/components/feed-post-card'
 
 import { AdCard } from '@/components/adcard'
 
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+
 // ── Feed Page ─────────────────────────────────────────────────
 export default function FeedPage() {
+
+  const { user } = useAuth()
+
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage, refetch } = useFeedPosts()
   const sentinelRef = useRef<HTMLDivElement>(null)
 
@@ -32,7 +41,33 @@ export default function FeedPage() {
 
       {/* Center feed */}
       <div className="flex-1 min-w-0 space-y-4">
-        <PostComposer />
+        
+        {user ? (
+            <PostComposer />
+          ) : (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <h3 className="text-lg font-semibold">
+                  Join the Baguio Cycling Community
+                </h3>
+
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Sign up to share rides, report hazards, post missing bikes,
+                  comment, and react to community posts.
+                </p>
+
+                <div className="mt-4 flex justify-center gap-3">
+                  <Link href="/login">
+                    <Button variant="outline">Log In</Button>
+                  </Link>
+
+                  <Link href="/signup">
+                    <Button>Create Account</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
         {!isLoading && posts.length > 0 && (
           <div className="flex justify-center">
