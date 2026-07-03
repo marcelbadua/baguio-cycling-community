@@ -90,6 +90,9 @@ export interface Post {
   // joined
   author?: Profile
   liked_by_me?: boolean
+
+  comments?: Comment[]
+  
 }
 
 export interface Comment {
