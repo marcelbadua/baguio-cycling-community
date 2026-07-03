@@ -134,7 +134,7 @@ export default function EventsPage() {
 
       {/* Create Event Sheet */}
       <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
+        <SheetContent side="right" className="w-full sm:max-w-xl overflow-auto">
           <SheetHeader className="mb-6">
             <SheetTitle>Create a Cycling Event</SheetTitle>
             <SheetDescription>
