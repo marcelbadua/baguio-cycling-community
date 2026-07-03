@@ -137,3 +137,25 @@ export async function updatePost(id: string, content: string): Promise<{ error?:
     .eq('id', id)
   return error ? { error: error.message } : {}
 }
+
+export async function getCommentPreview(postId: string): Promise<Comment[]> {
+  const { data } = await supabase
+    .from('comments')
+    .select(`
+      *,
+      author:profiles!author_id(
+        id,
+        username,
+        display_name,
+        first_name,
+        last_name,
+        avatar_url
+      )
+    `)
+    .eq('post_id', postId)
+    .eq('is_deleted', false)
+    .order('created_at', { ascending: true })
+    .limit(2)
+
+  return (data ?? []) as any
+}

@@ -7,9 +7,17 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import {
-  getFeedPosts, getPostById, createPost, deletePost,
-  toggleLike, uploadPostPhotos, getComments, addComment, deleteComment,
-} from './service'
+  getFeedPosts,
+  getPostById,
+  createPost,
+  deletePost,
+  toggleLike,
+  uploadPostPhotos,
+  getComments,
+  addComment,
+  deleteComment,
+  updatePost,
+} from '@/lib/api/feed'
 import type { Post } from '@/types/database'
 
 export const feedKeys = {
@@ -126,8 +134,6 @@ export function useDeleteComment(postId: string) {
     },
   })
 }
-
-import { updatePost } from './service'
 
 export function useUpdatePost() {
   const qc = useQueryClient()

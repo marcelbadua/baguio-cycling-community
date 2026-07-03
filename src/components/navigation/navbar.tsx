@@ -9,7 +9,7 @@ import {
   DropdownMenu, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Home, Calendar, AlertTriangle, Bike, Search, LogOut, Settings, User, Moon, Sun } from 'lucide-react'
+import { Home, Calendar, AlertTriangle, Bike, Search, LogOut, Settings, User, Moon, Sun, MapPinHouse } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
@@ -17,11 +17,12 @@ import { useRouter } from 'next/navigation'
 import { SITE } from "@/lib/site";
 
 const navItems = [
-  { href: '/feed',          icon: Home,          label: 'Feed'    },
-  { href: '/events',        icon: Calendar,      label: 'Events'  },
-  { href: '/missing-bikes', icon: Bike,          label: 'Missing' },
-  { href: '/hazards',       icon: AlertTriangle, label: 'Hazards' },
-  { href: '/search',        icon: Search,        label: 'Search'  },
+  { href: '/feed', icon: Home, label: 'Feed' },
+  { href: '/events', icon: Calendar, label: 'Events' },
+  { href: '/missing-bikes', icon: Bike, label: 'Missing' },
+  { href: '/hazards', icon: AlertTriangle, label: 'Hazards' },
+  // { href: '/search', icon: Search, label: 'Search' },
+  // { href: '/facilities', icon: MapPinHouse , label: 'Facilities' },
 ]
 
 export function Navbar() {
@@ -31,21 +32,24 @@ export function Navbar() {
   const router = useRouter()
   const initials = [profile?.first_name?.[0], profile?.last_name?.[0]].filter(Boolean).join('').toUpperCase() || '?'
 
+
   return (
     <>
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/feed" className="font-bold text-lg">{SITE.name}</Link>
 
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map(({ href, icon: Icon, label }) => (
-              <Link key={href} href={href}>
-                <Button variant={pathname.startsWith(href) ? 'secondary' : 'ghost'} size="sm">
-                  <Icon className="h-4 w-4 mr-1.5" />{label}
-                </Button>
-              </Link>
-            ))}
-          </nav>
+          {!loading && user ? (
+            <nav className="hidden md:flex items-center gap-1">
+              {navItems.map(({ href, icon: Icon, label }) => (
+                <Link key={href} href={href}>
+                  <Button variant={pathname.startsWith(href) ? 'secondary' : 'ghost'} size="sm">
+                    <Icon className="h-4 w-4 mr-1.5" />{label}
+                  </Button>
+                </Link>
+              ))}
+            </nav>
+          ) : null}
 
           <div className="flex items-center gap-2">
             {/* Theme toggle */}
