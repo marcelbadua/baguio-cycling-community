@@ -6,8 +6,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-primary">🚵 BCC</h1>
-          <p className="text-muted-foreground text-sm mt-1">Baguio Cycling Community</p>
+          <h1 className="text-3xl font-bold text-primary">🚵 Baguio Cycling Community</h1>
+          <p className="text-muted-foreground text-sm mt-1">Join the Baguio Cycling Community. Share rides, discover events, report road hazards, post missing bike alerts, and connect with cyclists across Baguio City.</p>
         </div>
         {children}
       </div>

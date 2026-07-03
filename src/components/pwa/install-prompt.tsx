@@ -53,7 +53,7 @@ export function InstallPrompt() {
           🚵
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm">Install BCC App</p>
+          <p className="font-semibold text-sm">Install Baguio Cycling Community App</p>
           <p className="text-xs text-muted-foreground mt-0.5">
             Add to your home screen for the best experience — works offline too.
           </p>

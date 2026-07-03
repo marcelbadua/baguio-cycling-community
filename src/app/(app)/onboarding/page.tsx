@@ -25,6 +25,9 @@ import { Loader2, ChevronRight, ChevronLeft } from 'lucide-react'
 import { getInitials } from '@/lib/utils'
 import type { CyclistType } from '@/types/database'
 
+import Link from "next/link";
+import { SITE } from "@/lib/site";
+
 const STEPS = ['Welcome', 'Your Info', 'Cyclist Type', 'Usual Route', 'Photo & Socials', 'Done']
 
 const step1Schema = z.object({
@@ -151,7 +154,7 @@ export default function OnboardingPage() {
         {/* Header */}
         <div className="text-center space-y-1">
           <p className="text-4xl">🚵</p>
-          <h1 className="text-2xl font-bold">Welcome to BCC!</h1>
+          <h1 className="text-2xl font-bold">Welcome to {SITE.name}!</h1>
           <p className="text-muted-foreground text-sm">Let's set up your profile — it only takes a minute.</p>
         </div>
 

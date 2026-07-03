@@ -86,7 +86,7 @@ export function EventForm({ defaultValues, onSubmit, isPending, submitLabel = 'C
   }
 
   return (
-    <form onSubmit={handleSubmit(d => onSubmit(d, coverFile ?? undefined))} className="space-y-5">
+    <form onSubmit={handleSubmit(d => onSubmit(d, coverFile ?? undefined))} className="space-y-5 px-4 mb-6">
 
       {/* Cover Image */}
       <div className="space-y-2">
@@ -172,9 +172,9 @@ export function EventForm({ defaultValues, onSubmit, isPending, submitLabel = 'C
         <Label>Ride Pace</Label>
         <select
           {...register('pace')}
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
-          <option value="">Select pace...</option>
+          <option value="" className="bg-background text-foreground">Select pace...</option>
           {PACE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>

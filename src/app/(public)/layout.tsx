@@ -11,7 +11,7 @@ export default function PublicLayout({
       <header className="border-b bg-background/80 backdrop-blur sticky top-0 z-50">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <Link href="/" className="font-bold text-lg">
-            🚴 Baguio Cycling Community
+            Baguio Cycling Community
           </Link>
 
           <div className="flex items-center gap-3">

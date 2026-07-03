@@ -50,7 +50,7 @@ export function HazardForm({ onSubmit, isPending }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit(d => onSubmit(d, photoFile ?? undefined))} className="space-y-5">
+    <form onSubmit={handleSubmit(d => onSubmit(d, photoFile ?? undefined))} className="space-y-5 px-4 mb-6">
 
       {/* Hazard type */}
       <div className="space-y-2">
@@ -103,9 +103,9 @@ export function HazardForm({ onSubmit, isPending }: Props) {
           render={({ field }) => (
             <select
               {...field}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <option value="">Select barangay...</option>
+              className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+>
+              <option value="" className="bg-background text-foreground">Select barangay...</option>
               {BAGUIO_BARANGAYS.map(b => <option key={b} value={b}>{b}</option>)}
             </select>
           )}

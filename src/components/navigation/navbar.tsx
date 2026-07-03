@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
 
+import { SITE } from "@/lib/site";
+
 const navItems = [
   { href: '/feed',          icon: Home,          label: 'Feed'    },
   { href: '/events',        icon: Calendar,      label: 'Events'  },
@@ -33,7 +35,7 @@ export function Navbar() {
     <>
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/feed" className="font-bold text-lg text-primary">🚵 BCC</Link>
+          <Link href="/feed" className="font-bold text-lg text-primary">{SITE.name}</Link>
 
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map(({ href, icon: Icon, label }) => (

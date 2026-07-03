@@ -15,6 +15,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Search, Users, Calendar, Bike } from 'lucide-react'
 
+import Link from "next/link";
+import { SITE } from "@/lib/site";
+
 type Tab = 'all' | 'cyclists' | 'events' | 'missing'
 
 export default function SearchPage() {
@@ -155,7 +158,7 @@ export default function SearchPage() {
       {!loading && !results && (
         <div className="text-center py-24 space-y-3">
           <p className="text-5xl">🚵</p>
-          <h3 className="font-semibold text-lg">Find anything in BCC</h3>
+          <h3 className="font-semibold text-lg">Find anything in {SITE.name}</h3>
           <p className="text-muted-foreground text-sm max-w-xs mx-auto">
             Search for cyclists by name or username, upcoming events, or missing bikes.
           </p>
