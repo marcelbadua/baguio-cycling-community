@@ -85,7 +85,7 @@ export async function login(input: {
     return { error: error.message }
   }
 
-  redirect('/feed')
+  return { success: true }
 }
 
 export async function signInWithGoogle() {
@@ -152,6 +152,4 @@ export async function signOut() {
   const supabase = (await createServerSupabaseClient()) as any
 
   await supabase.auth.signOut()
-
-  redirect('/login')
 }

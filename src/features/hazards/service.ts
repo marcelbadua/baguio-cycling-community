@@ -175,6 +175,11 @@ export async function uploadHazardPhoto(
 }
 
 // ── Confirmations ─────────────────────────────────────────────
+// confirm_count and status auto-sync via a database trigger on
+// hazard_confirmations (see hazard-confirmation-migration.sql) —
+// the client only ever writes to its own confirmation row, never
+// directly to hazard_reports. This is what lets ANY community
+// member confirm a hazard, not just the reporter or an admin.
 
 export async function confirmHazard(
   hazardId: string,
@@ -183,44 +188,17 @@ export async function confirmHazard(
 ): Promise<{ error?: string }> {
   const { error } = await supabase
     .from('hazard_confirmations')
-    .upsert({
-      hazard_id: hazardId,
-      user_id: userId,
-      fixed,
-    })
-
-  if (error) return { error: error.message }
-
-  const { data: confs } = await supabase
-    .from('hazard_confirmations')
-    .select('id')
-    .eq('hazard_id', hazardId)
-
-  await supabase
-    .from('hazard_reports')
-    .update({
-      confirm_count: confs?.length ?? 0,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', hazardId)
-
-  const { data: fixedConfs } = await supabase
-    .from('hazard_confirmations')
-    .select('id')
-    .eq('hazard_id', hazardId)
-    .eq('fixed', true)
-
-  if ((fixedConfs?.length ?? 0) >= 3) {
-    await supabase
-      .from('hazard_reports')
-      .update({
-        status: 'fixed',
+    .upsert(
+      {
+        hazard_id: hazardId,
+        user_id: userId,
+        fixed,
         updated_at: new Date().toISOString(),
-      })
-      .eq('id', hazardId)
-  }
+      },
+      { onConflict: 'hazard_id,user_id' }
+    )
 
-  return {}
+  return error ? { error: error.message } : {}
 }
 
 export async function removeConfirmation(
@@ -234,21 +212,6 @@ export async function removeConfirmation(
       hazard_id: hazardId,
       user_id: userId,
     })
-
-  if (!error) {
-    const { data: confs } = await supabase
-      .from('hazard_confirmations')
-      .select('id')
-      .eq('hazard_id', hazardId)
-
-    await supabase
-      .from('hazard_reports')
-      .update({
-        confirm_count: confs?.length ?? 0,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', hazardId)
-  }
 
   return error ? { error: error.message } : {}
 }

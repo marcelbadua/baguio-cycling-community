@@ -98,7 +98,10 @@ export function Navbar() {
                     className="text-destructive cursor-pointer"
                     onClick={async () => {
                       await signOut()
-                      router.push('/login')
+                      // Hard navigation on purpose — same reasoning as login:
+                      // a soft nav wouldn't force AuthProvider to drop its
+                      // stale in-memory user/profile state.
+                      window.location.href = '/login'
                     }}
                   >
                     <LogOut className="mr-2 h-4 w-4" /> Sign Out
@@ -123,8 +126,6 @@ export function Navbar() {
           ))}
         </div>
       </nav>
-        
-
     </>
   )
 }

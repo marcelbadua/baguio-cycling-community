@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { login, signInWithGoogle, signInWithFacebook } from '@/features/auth/actions'
 import { Loader2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 
 const schema = z.object({ email: z.string().email(), password: z.string().min(1) })
@@ -20,7 +19,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const { register, handleSubmit, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema) })
-  const router = useRouter()
   const queryClient = useQueryClient()
 
   const onSubmit = (data: F) => {
@@ -31,7 +29,12 @@ export default function LoginPage() {
         setError(result.error)
       } else {
         queryClient.clear()
-        router.push('/feed')
+        // Hard navigation on purpose: the login server action set a fresh
+        // session cookie, but a soft client-side nav wouldn't cause the
+        // browser's Supabase client (and AuthProvider) to re-read it —
+        // they were mounted before login happened. A full reload forces
+        // everything to pick up the new session correctly.
+        window.location.href = '/feed'
       }
     })
   }
