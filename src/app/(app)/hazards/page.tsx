@@ -104,9 +104,9 @@ export default function HazardsPage() {
         <select
           value={typeFilter}
           onChange={e => setTypeFilter(e.target.value as HazardType | 'all')}
-          className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="h-9 rounded-md border border-input bg-background text-foreground px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
-          <option value="all">All Types</option>
+          <option value="all" className="bg-background text-foreground">All Types</option>
           {(Object.entries(HAZARD_TYPE_CONFIG) as [HazardType, any][]).map(([t, cfg]) => (
             <option key={t} value={t}>{cfg.emoji} {cfg.label}</option>
           ))}
