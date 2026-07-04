@@ -149,8 +149,10 @@ async function refreshRsvpCounts(eventId: string) {
     return
   }
 
-  const going = (data ?? []).filter(r => r.status === "going").length
-  const interested = (data ?? []).filter(r => r.status === "interested").length
+const rows = (data ?? []) as { status: string }[]
+
+const going = rows.filter(r => r.status === "going").length
+const interested = rows.filter(r => r.status === "interested").length
 
   console.log("Calculated counts:", { going, interested })
 
