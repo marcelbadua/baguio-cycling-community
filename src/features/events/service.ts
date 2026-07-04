@@ -119,6 +119,9 @@ export async function uploadEventCover(
 export async function upsertRsvp(
   eventId: string, userId: string, status: RsvpStatus
 ): Promise<{ error?: string }> {
+
+  console.log("upsertRsvp called", { eventId, userId, status })
+  
   const { error } = await supabase
     .from('event_rsvps')
     .upsert({ event_id: eventId, user_id: userId, status, updated_at: new Date().toISOString() })
@@ -136,17 +139,32 @@ export async function removeRsvp(eventId: string, userId: string): Promise<{ err
 }
 
 async function refreshRsvpCounts(eventId: string) {
-  const { data } = await supabase
-    .from('event_rsvps')
-    .select('status')
-    .eq('event_id', eventId)
-  if (!data) return
-  const going = (data as any[]).filter((r: any) => r.status === 'going').length
-const interested = (data as any[]).filter((r: any) => r.status === 'interested').length
-  await supabase
-    .from('events')
-    .update({ rsvp_going_count: going, rsvp_interested_count: interested })
-    .eq('id', eventId)
+  const { data, error: fetchError } = await supabase
+    .from("event_rsvps")
+    .select("status")
+    .eq("event_id", eventId)
+
+  if (fetchError) {
+    console.error("Failed to fetch RSVPs:", fetchError)
+    return
+  }
+
+  const going = (data ?? []).filter(r => r.status === "going").length
+  const interested = (data ?? []).filter(r => r.status === "interested").length
+
+  console.log("Calculated counts:", { going, interested })
+
+  const { data: updated, error: updateError } = await supabase
+    .from("events")
+    .update({
+      rsvp_going_count: going,
+      rsvp_interested_count: interested,
+    })
+    .eq("id", eventId)
+    .select()
+
+  console.log("Update result:", updated)
+  console.log("Update error:", updateError)
 }
 
 export async function getEventAttendees(eventId: string): Promise<EventRsvp[]> {
