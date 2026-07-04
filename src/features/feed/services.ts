@@ -20,7 +20,31 @@ export async function getFeedPosts(page = 0, pageSize = 15): Promise<Post[]> {
 
   const { data } = await supabase
     .from('posts')
-    .select(POST_SELECT)
+    .select(`
+      *,
+      author:profiles!author_id(
+        id,
+        username,
+        display_name,
+        first_name,
+        last_name,
+        avatar_url
+      ),
+      comments(
+        id,
+        content,
+        created_at,
+        author:profiles!author_id(
+          id,
+          username,
+          display_name,
+          first_name,
+          last_name,
+          avatar_url
+        )
+      ),
+      post_likes(user_id)
+    `)
     .eq('is_deleted', false)
     .order('is_pinned', { ascending: false })
     .order('created_at', { ascending: false })
@@ -28,22 +52,41 @@ export async function getFeedPosts(page = 0, pageSize = 15): Promise<Post[]> {
 
   if (!data) return []
 
-  return (data as any[]).map((p: any) => ({
-    ...p,
-    liked_by_me: Array.isArray(p.liked_by_me)
-      ? p.liked_by_me.some((l: { user_id: string }) => l.user_id === user?.id)
-      : false,
-  }))
+  return (data as any[]).map((p) => {
+    const liked_by_me = Array.isArray(p.post_likes)
+      ? p.post_likes.some((l: any) => l.user_id === user?.id)
+      : false
+
+    return {
+      ...p,
+      liked_by_me,
+
+      // IMPORTANT: only take 2 comments (frontend-safe trimming)
+      comments: (p.comments ?? [])
+        .sort((a: any, b: any) =>
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime()
+        )
+        .slice(0, 2),
+    }
+  })
 }
 
 export async function getPostById(id: string): Promise<Post | null> {
   const { data: { user } } = await supabase.auth.getUser()
-  const { data } = await supabase
+
+  const { data, error } = await supabase
     .from('posts')
     .select(POST_SELECT)
     .eq('id', id)
+    .eq('is_deleted', false)
     .single()
-  if (!data) return null
+
+  if (error) {
+    console.error(error)
+    return null
+  }
+
   return {
     ...data,
     liked_by_me: Array.isArray(data.liked_by_me)

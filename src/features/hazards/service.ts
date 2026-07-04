@@ -185,26 +185,20 @@ export async function confirmHazard(
   hazardId: string,
   userId: string,
   fixed: boolean
-) {
-  const { data, error } = await supabase
-    .from('hazard_confirmations')
+): Promise<{ error?: string }> {
+  const { error } = await supabase
+    .from("hazard_confirmations")
     .upsert(
       {
         hazard_id: hazardId,
         user_id: userId,
         fixed,
-        updated_at: new Date().toISOString(),
       },
       {
-        onConflict: 'hazard_id,user_id',
+        onConflict: "hazard_id,user_id",
       }
     )
     .select()
-
-  console.log("UPSERT DATA:", data)
-  console.log("UPSERT ERROR:", error)
-
-  await refreshConfirmCount(hazardId)
 
   return error ? { error: error.message } : {}
 }
@@ -221,10 +215,6 @@ export async function removeConfirmation(
       user_id: userId,
     })
 
-    console.log("DELETE ERROR:", error)
-
-    await refreshConfirmCount(hazardId)
-
   return error ? { error: error.message } : {}
 }
 
@@ -237,18 +227,4 @@ export async function updateHazardReport(
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
   return error ? { error: error.message } : {}
-}
-
-async function refreshConfirmCount(hazardId: string) {
-  const { count } = await supabase
-    .from('hazard_confirmations')
-    .select('*', { count: 'exact', head: true })
-    .eq('hazard_id', hazardId)
-
-  await supabase
-    .from('hazard_reports')
-    .update({
-      confirm_count: count ?? 0,
-    })
-    .eq('id', hazardId)
 }

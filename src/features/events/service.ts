@@ -84,21 +84,10 @@ export async function updateEvent(id: string, updates: Partial<Event>): Promise<
 }
 
 export async function deleteEvent(id: string) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  console.log("Current user:", user)
-
-  const { data, error, status } = await supabase
+  const { error } = await supabase
     .from("events")
     .update({ is_deleted: true })
     .eq("id", id)
-    .select()
-
-  console.log("Status:", status)
-  console.log("Data:", data)
-  console.log("Error:", error)
 
   return { error: error?.message }
 }
@@ -119,13 +108,10 @@ export async function uploadEventCover(
 export async function upsertRsvp(
   eventId: string, userId: string, status: RsvpStatus
 ): Promise<{ error?: string }> {
-
-  console.log("upsertRsvp called", { eventId, userId, status })
-  
   const { error } = await supabase
     .from('event_rsvps')
     .upsert({ event_id: eventId, user_id: userId, status, updated_at: new Date().toISOString() })
-  if (!error) await refreshRsvpCounts(eventId)
+
   return error ? { error: error.message } : {}
 }
 
@@ -134,40 +120,9 @@ export async function removeRsvp(eventId: string, userId: string): Promise<{ err
     .from('event_rsvps')
     .delete()
     .match({ event_id: eventId, user_id: userId })
-  if (!error) await refreshRsvpCounts(eventId)
   return error ? { error: error.message } : {}
 }
 
-async function refreshRsvpCounts(eventId: string) {
-  const { data, error: fetchError } = await supabase
-    .from("event_rsvps")
-    .select("status")
-    .eq("event_id", eventId)
-
-  if (fetchError) {
-    console.error("Failed to fetch RSVPs:", fetchError)
-    return
-  }
-
-const rows = (data ?? []) as { status: string }[]
-
-const going = rows.filter(r => r.status === "going").length
-const interested = rows.filter(r => r.status === "interested").length
-
-  console.log("Calculated counts:", { going, interested })
-
-  const { data: updated, error: updateError } = await supabase
-    .from("events")
-    .update({
-      rsvp_going_count: going,
-      rsvp_interested_count: interested,
-    })
-    .eq("id", eventId)
-    .select()
-
-  console.log("Update result:", updated)
-  console.log("Update error:", updateError)
-}
 
 export async function getEventAttendees(eventId: string): Promise<EventRsvp[]> {
   const { data } = await supabase

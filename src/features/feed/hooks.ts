@@ -17,7 +17,7 @@ import {
   addComment,
   deleteComment,
   updatePost,
-} from '@/lib/api/feed'
+} from '@/features/feed/services'
 import type { Post } from '@/types/database'
 
 export const feedKeys = {

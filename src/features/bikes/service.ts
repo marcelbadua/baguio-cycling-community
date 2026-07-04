@@ -3,6 +3,7 @@
 // ============================================================
 import { createClient } from '@/lib/supabase/client'
 import type { Bike } from '@/types/database'
+import { uploadToBucket } from '@/lib/supabase/upload'
 
 const supabase = createClient() as any
 
@@ -52,19 +53,19 @@ export async function deleteBike(id: string): Promise<{ error?: string }> {
   return error ? { error: error.message } : {}
 }
 
+// src/features/bikes/service.ts
+ 
+
+ 
 export async function uploadBikePhoto(
   userId: string,
   bikeId: string,
   file: File
 ): Promise<{ url?: string; error?: string }> {
-  const ext = file.name.split('.').pop()
-  const path = `${userId}/${bikeId}-${Date.now()}.${ext}`
-  const { error } = await supabase.storage
-    .from('bikes')
-    .upload(path, file, { upsert: true })
-  if (error) return { error: error.message }
-  const { data } = supabase.storage.from('bikes').getPublicUrl(path)
-  return { url: data.publicUrl }
+  return uploadToBucket(supabase, 'bikes', userId, file, {
+    upsert: true,
+    fileNamePrefix: bikeId,
+  })
 }
 
 export async function markBikeAsMissing(bikeId: string): Promise<{ error?: string }> {

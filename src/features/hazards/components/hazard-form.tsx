@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { HazardTypePicker } from './hazard-type-picker'
-import { BAGUIO_BARANGAYS } from '../constants'
+import { BARANGAYS } from "@/lib/constants/barangays"
 import { Upload, X, Loader2 } from 'lucide-react'
 import type { HazardType } from '@/types/database'
 import { Input } from '@/components/ui/input'
@@ -106,7 +106,7 @@ export function HazardForm({ onSubmit, isPending }: Props) {
               className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 >
               <option value="" className="bg-background text-foreground">Select barangay...</option>
-              {BAGUIO_BARANGAYS.map(b => <option key={b} value={b}>{b}</option>)}
+              {BARANGAYS.map(b => <option key={b} value={b}>{b}</option>)}
             </select>
           )}
         />

@@ -19,32 +19,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { Loader2 } from 'lucide-react'
 import type { CyclistType } from '@/types/database'
 
-const BARANGAYS = [
-  'Abanao-Zandueta-Kayong-Chugum-Otek', 'Alfonso Tabora', 'Ambiong', 'Andres Bonifacio',
-  'Asin Road', 'Atok Trail', 'Aurora Hill Proper', 'Bakakeng Central', 'Bakakeng North',
-  'Balsigan', 'Bayan Park East', 'Bayan Park Village', 'Bayan Park West', 'BGH Compound',
-  'Brookside', 'Brookspoint', 'Cabinet Hill-Teachers Camp', 'Campo Filipino',
-  'City Camp Central', 'City Camp Proper', 'Country Club Village', 'Dagsian Lower',
-  'Dagsian Upper', 'Dizon Subdivision', 'Dominican Hill-Mirador', 'Dontogan', 'DPS Area',
-  'Engineers Hill', 'Fairview Village', 'Fort del Pilar', 'Gabriela Silang', 'Glenwood',
-  'Greenwater Village', 'Guisad Central', 'Guisad Sorong', 'Happy Hollow', 'Harrison Road',
-  'Hillside', 'Holy Ghost Extension', 'Holy Ghost Proper', 'Honeymoon (Honeymoon Road)',
-  'Imelda R. Marcos', 'Irisan', 'Kayang-Hilltop', 'Kayang-Kamias', 'Kias', 'Legarda-Burnham-Kisad',
-  'Lourdes Subdivision Extension', 'Lourdes Subdivision Proper', 'Lower Magsaysay',
-  'Lower QM (Quirino Hill Lower)', 'Lualhati', 'Lucnab', 'Magsaysay Private Road',
-  'Malcolm Square-Perfecto', 'Manuel A. Roxas', 'Market Subdivision Upper', 'Middle Quezon Hill',
-  'Military Cut-off', 'Mines View Park', 'Modern Site East', 'Modern Site West',
-  'MRR-QM (Magsaysay-Quirino Hill)', 'New Lucban', 'Outlook Drive', 'Pacdal',
-  'Padre Burgos', 'Padre Zamora', 'Palma-Urbano', 'Pinsao Pilot Project', 'Pinsao Proper',
-  'Poliwes', 'Pucsusan', 'Quezon Hill Proper', 'Quezon Hill Upper', 'Quirino Hill East',
-  'Quirino Hill Lower', 'Quirino Hill Middle', 'Quirino Hill West', 'Quirino-Magsaysay-Recto',
-  'Rizal Monument Area', 'Rock Quarry Lower', 'Rock Quarry Middle', 'Rock Quarry Upper',
-  'Salisbar', 'San Antonio Village', 'San Luis Village', 'San Roque Village',
-  'San Vicente', 'Santa Escolastica', 'Santo Rosario', 'Santo Tomas Proper',
-  'Santo Tomas School Area', 'Session Road Area', 'Slaughter House Area',
-  'SLU-SVP Housing Village', 'South Drive', 'Teodora Alonzo', 'Trancoville', 'Upper Magsaysay',
-  'Upper QM (Quirino Hill Upper)', 'Upper Quezon Hill Subdiv.', 'Valencia',
-]
+import { BARANGAYS } from "@/lib/constants/barangays"
 
 const settingsSchema = z.object({
   first_name:    z.string().min(1, 'Required'),
@@ -177,8 +152,8 @@ export default function ProfileSettingsPage() {
             <div className="space-y-1">
               <Label>Barangay</Label>
               <Controller name="barangay" control={control} render={({ field }) => (
-                <select {...field} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-                  <option value="">Select barangay...</option>
+                <select {...field} className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                  <option value="" className="bg-background text-foreground">Select barangay...</option>
                   {BARANGAYS.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
               )} />

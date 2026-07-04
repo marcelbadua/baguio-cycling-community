@@ -22,12 +22,9 @@ export async function signUp(input: {
   firstName: string
   lastName: string
 }) {
-  console.log('signUp received:', input)
-
   const parsed = signUpSchema.safeParse(input)
 
   if (!parsed.success) {
-    console.log('signUp VALIDATION FAILED:', parsed.error.issues)
     return {
       error: parsed.error.issues[0]?.message ?? 'Validation failed',
     }
@@ -35,7 +32,7 @@ export async function signUp(input: {
 
   const supabase = (await createServerSupabaseClient()) as any
 
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
@@ -47,9 +44,6 @@ export async function signUp(input: {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
     },
   })
-
-  console.log('SUPABASE SIGNUP DATA:', JSON.stringify(data, null, 2))
-  console.log('SUPABASE SIGNUP ERROR:', error)
 
   if (error) {
     return { error: error.message }
@@ -64,8 +58,6 @@ export async function login(input: {
   email: string
   password: string
 }) {
-  console.log('login received:', input)
-
   const parsed = loginSchema.safeParse(input)
 
   if (!parsed.success) {

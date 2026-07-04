@@ -4,6 +4,8 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Profile, CyclistType } from '@/types/database'
 
+import { uploadToBucket } from '@/lib/supabase/upload'
+
 const supabase = createClient() as any
 
 export async function getProfileByUsername(username: string): Promise<Profile | null> {
@@ -32,22 +34,12 @@ export async function updateProfile(id: string, updates: Partial<Profile>): Prom
   return error ? { error: error.message } : {}
 }
 
-export async function uploadAvatar(userId: string, file: File): Promise<{ url?: string; error?: string }> {
-  const ext = file.name.split('.').pop()
-  const path = `${userId}/avatar-${Date.now()}.${ext}`
-  const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
-  if (error) return { error: error.message }
-  const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-  return { url: data.publicUrl }
+export async function uploadAvatar(userId: string, file: File) {
+  return uploadToBucket(supabase, 'avatars', userId, file, { upsert: true })
 }
 
-export async function uploadCover(userId: string, file: File): Promise<{ url?: string; error?: string }> {
-  const ext = file.name.split('.').pop()
-  const path = `${userId}/cover-${Date.now()}.${ext}`
-  const { error } = await supabase.storage.from('covers').upload(path, file, { upsert: true })
-  if (error) return { error: error.message }
-  const { data } = supabase.storage.from('covers').getPublicUrl(path)
-  return { url: data.publicUrl }
+export async function uploadCover(userId: string, file: File) {
+  return uploadToBucket(supabase, 'covers', userId, file, { upsert: true })
 }
 
 export async function searchCyclists(query: string): Promise<Profile[]> {
