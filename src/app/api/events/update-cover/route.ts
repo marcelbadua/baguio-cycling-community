@@ -15,8 +15,9 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = await createServerSupabaseClient()
-  // cast to any to satisfy supabase typed update when using dynamic keys
-  const { error } = await supabase.from('events').update({ cover_url: coverUrl } as any).eq('id', eventId)
+  const { error } = await supabase.from('events').update({
+      cover_url: coverUrl ?? null,
+    } as any)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
