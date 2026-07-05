@@ -1,4 +1,3 @@
-
 // ============================================================
 // src/features/admin/hooks.ts
 // ============================================================
@@ -11,15 +10,23 @@ import {
   getAdminMissingBikes, adminUpdateMissingStatus,
   postAnnouncement,
 } from './service'
+import { feedKeys } from '@/features/feed/hooks'
+import { eventKeys } from '@/features/events/hooks'
+import { hazardKeys } from '@/features/hazards/hooks'
 
 export const adminKeys = {
-  stats:         ['admin', 'stats'] as const,
-  users:         (p: number) => ['admin', 'users', p] as const,
-  userSearch:    (q: string) => ['admin', 'users', 'search', q] as const,
-  posts:         (p: number) => ['admin', 'posts', p] as const,
-  events:        (p: number) => ['admin', 'events', p] as const,
-  hazards:       (p: number) => ['admin', 'hazards', p] as const,
-  missingBikes:  (p: number) => ['admin', 'missing', p] as const,
+  stats:             ['admin', 'stats'] as const,
+  usersRoot:         ['admin', 'users'] as const,
+  users:             (p: number) => ['admin', 'users', p] as const,
+  userSearch:        (q: string) => ['admin', 'users', 'search', q] as const,
+  postsRoot:         ['admin', 'posts'] as const,
+  posts:             (p: number) => ['admin', 'posts', p] as const,
+  eventsRoot:        ['admin', 'events'] as const,
+  events:            (p: number) => ['admin', 'events', p] as const,
+  hazardsRoot:       ['admin', 'hazards'] as const,
+  hazards:           (p: number) => ['admin', 'hazards', p] as const,
+  missingBikesRoot:  ['admin', 'missing'] as const,
+  missingBikes:      (p: number) => ['admin', 'missing', p] as const,
 }
 
 export function useDashboardStats() {
@@ -43,7 +50,7 @@ export function useSetUserRole() {
   return useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: import('@/types/database').UserRole }) =>
       setUserRole(userId, role),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'users'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: adminKeys.usersRoot }),
   })
 }
 
@@ -52,7 +59,7 @@ export function useSetUserActive() {
   return useMutation({
     mutationFn: ({ userId, isActive }: { userId: string; isActive: boolean }) =>
       setUserActive(userId, isActive),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'users'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: adminKeys.usersRoot }),
   })
 }
 
@@ -65,8 +72,8 @@ export function useAdminDeletePost() {
   return useMutation({
     mutationFn: (id: string) => adminDeletePost(id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'posts'] })
-      qc.invalidateQueries({ queryKey: ['feed'] })
+      qc.invalidateQueries({ queryKey: adminKeys.postsRoot })
+      qc.invalidateQueries({ queryKey: feedKeys.all })
     },
   })
 }
@@ -76,8 +83,8 @@ export function useAdminPinPost() {
   return useMutation({
     mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) => adminPinPost(id, pinned),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'posts'] })
-      qc.invalidateQueries({ queryKey: ['feed'] })
+      qc.invalidateQueries({ queryKey: adminKeys.postsRoot })
+      qc.invalidateQueries({ queryKey: feedKeys.all })
     },
   })
 }
@@ -91,8 +98,8 @@ export function useAdminDeleteEvent() {
   return useMutation({
     mutationFn: (id: string) => adminDeleteEvent(id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'events'] })
-      qc.invalidateQueries({ queryKey: ['events'] })
+      qc.invalidateQueries({ queryKey: adminKeys.eventsRoot })
+      qc.invalidateQueries({ queryKey: eventKeys.root })
     },
   })
 }
@@ -105,7 +112,10 @@ export function useAdminDeleteHazard() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => adminDeleteHazard(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'hazards'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: adminKeys.hazardsRoot })
+      qc.invalidateQueries({ queryKey: hazardKeys.root })
+    },
   })
 }
 
@@ -114,7 +124,10 @@ export function useAdminSetHazardStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'active' | 'fixed' }) =>
       adminSetHazardStatus(id, status),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'hazards'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: adminKeys.hazardsRoot })
+      qc.invalidateQueries({ queryKey: hazardKeys.root })
+    },
   })
 }
 
@@ -127,7 +140,9 @@ export function useAdminUpdateMissingStatus() {
   return useMutation({
     mutationFn: ({ id, bikeId, status }: { id: string; bikeId: string; status: 'missing' | 'recovered' }) =>
       adminUpdateMissingStatus(id, bikeId, status),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin'] }),
+    // Narrowed from the old blanket ['admin'] invalidation, which refetched
+    // every admin list (users/posts/events/hazards) for a missing-bike-only change.
+    onSuccess: () => qc.invalidateQueries({ queryKey: adminKeys.missingBikesRoot }),
   })
 }
 
@@ -135,6 +150,6 @@ export function usePostAnnouncement() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (p: Parameters<typeof postAnnouncement>[0]) => postAnnouncement(p),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['feed'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: feedKeys.all }),
   })
 }

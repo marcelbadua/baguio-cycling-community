@@ -1,35 +1,57 @@
-
 // ============================================================
 // src/features/missing-bikes/hooks.ts
 // ============================================================
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import {
-  getActiveMissingBikes, getAllMissingBikes, getMissingBikeById,
-  getMyMissingReports, createMissingBikeReport, updateMissingBikeReport,
-  markAsRecovered, uploadMissingBikePhotos, getMissingBikeComments,
+  getActiveMissingBikes,
+  getAllMissingBikes,
+  getMissingBikeById,
+  getMyMissingReports,
+  createMissingBikeReport,
+  updateMissingBikeReport,
+  markAsRecovered,
+  uploadMissingBikePhotos,
+  getMissingBikeComments,
   addMissingBikeComment,
-} from './service'
+} from "./service";
+
+import { bikeKeys } from "@/features/bikes/hooks";
+import { feedKeys } from "@/features/feed/hooks";
+
+// ============================================================
+// Query Keys
+// ============================================================
 
 export const missingKeys = {
-  active:  ['missing-bikes', 'active'] as const,
-  all:     ['missing-bikes', 'all'] as const,
-  mine:    (uid: string) => ['missing-bikes', 'mine', uid] as const,
-  detail:  (id: string)  => ['missing-bikes', 'detail', id] as const,
-  comments:(id: string)  => ['missing-bikes', 'comments', id] as const,
-}
+  root: ["missing-bikes"] as const,
+  active: ["missing-bikes", "active"] as const,
+  all: ["missing-bikes", "all"] as const,
+  mine: (userId: string) =>
+    ["missing-bikes", "mine", userId] as const,
+  detail: (reportId: string) =>
+    ["missing-bikes", "detail", reportId] as const,
+  comments: (reportId: string) =>
+    ["missing-bikes", "comments", reportId] as const,
+};
+
+// ============================================================
+// Queries
+// ============================================================
 
 export function useActiveMissingBikes() {
   return useQuery({
     queryKey: missingKeys.active,
     queryFn: getActiveMissingBikes,
-  })
+  });
 }
 
 export function useAllMissingBikes() {
   return useQuery({
     queryKey: missingKeys.all,
     queryFn: getAllMissingBikes,
-  })
+  });
 }
 
 export function useMissingBikeById(id: string) {
@@ -37,7 +59,7 @@ export function useMissingBikeById(id: string) {
     queryKey: missingKeys.detail(id),
     queryFn: () => getMissingBikeById(id),
     enabled: !!id,
-  })
+  });
 }
 
 export function useMyMissingReports(ownerId: string) {
@@ -45,53 +67,96 @@ export function useMyMissingReports(ownerId: string) {
     queryKey: missingKeys.mine(ownerId),
     queryFn: () => getMyMissingReports(ownerId),
     enabled: !!ownerId,
-  })
+  });
 }
 
+// ============================================================
+// Mutations
+// ============================================================
+
 export function useCreateMissingReport() {
-  const qc = useQueryClient()
+  const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: (payload: Parameters<typeof createMissingBikeReport>[0]) =>
-      createMissingBikeReport(payload),
+    mutationFn: createMissingBikeReport,
+
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: missingKeys.active })
-      qc.invalidateQueries({ queryKey: ['bikes'] })
-      qc.invalidateQueries({ queryKey: ['feed'] })
+      qc.invalidateQueries({
+        queryKey: missingKeys.root,
+      });
+
+      qc.invalidateQueries({
+        queryKey: bikeKeys.root,
+      });
+
+      qc.invalidateQueries({
+        queryKey: feedKeys.all,
+      });
     },
-  })
+  });
 }
 
 export function useUpdateMissingReport(reportId: string) {
-  const qc = useQueryClient()
+  const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: (updates: Parameters<typeof updateMissingBikeReport>[1]) =>
-      updateMissingBikeReport(reportId, updates),
+    mutationFn: (
+      updates: Parameters<typeof updateMissingBikeReport>[1]
+    ) => updateMissingBikeReport(reportId, updates),
+
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: missingKeys.detail(reportId) })
-      qc.invalidateQueries({ queryKey: missingKeys.active })
+      qc.invalidateQueries({
+        queryKey: missingKeys.detail(reportId),
+      });
+
+      qc.invalidateQueries({
+        queryKey: missingKeys.root,
+      });
     },
-  })
+  });
 }
 
 export function useMarkAsRecovered() {
-  const qc = useQueryClient()
+  const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: ({ reportId, bikeId }: { reportId: string; bikeId: string }) =>
-      markAsRecovered(reportId, bikeId),
+    mutationFn: ({
+      reportId,
+      bikeId,
+    }: {
+      reportId: string;
+      bikeId: string;
+    }) => markAsRecovered(reportId, bikeId),
+
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['missing-bikes'] })
-      qc.invalidateQueries({ queryKey: ['bikes'] })
-      qc.invalidateQueries({ queryKey: ['feed'] })
+      qc.invalidateQueries({
+        queryKey: missingKeys.root,
+      });
+
+      qc.invalidateQueries({
+        queryKey: bikeKeys.root,
+      });
+
+      qc.invalidateQueries({
+        queryKey: feedKeys.all,
+      });
     },
-  })
+  });
 }
 
 export function useUploadMissingPhotos() {
   return useMutation({
-    mutationFn: ({ ownerId, reportId, files }: {
-      ownerId: string; reportId: string; files: File[]
-    }) => uploadMissingBikePhotos(ownerId, reportId, files),
-  })
+    mutationFn: ({
+      ownerId,
+      reportId,
+      files,
+    }: {
+      ownerId: string;
+      reportId: string;
+      files: File[];
+    }) =>
+      uploadMissingBikePhotos(ownerId, reportId, files),
+  });
 }
 
 export function useMissingBikeComments(reportId: string) {
@@ -99,14 +164,23 @@ export function useMissingBikeComments(reportId: string) {
     queryKey: missingKeys.comments(reportId),
     queryFn: () => getMissingBikeComments(reportId),
     enabled: !!reportId,
-  })
+  });
 }
 
 export function useAddMissingBikeComment(reportId: string) {
-  const qc = useQueryClient()
+  const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: (payload: Parameters<typeof addMissingBikeComment>[0]) =>
-      addMissingBikeComment(payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: missingKeys.comments(reportId) }),
-  })
+    mutationFn: addMissingBikeComment,
+
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: missingKeys.comments(reportId),
+      });
+
+      qc.invalidateQueries({
+        queryKey: missingKeys.detail(reportId),
+      });
+    },
+  });
 }

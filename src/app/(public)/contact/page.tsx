@@ -1,3 +1,19 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Contact Us',
+    description: 'Get in touch with the Baguio Cycling Community team.',
+    alternates: { canonical: '/contact' },
+    openGraph: {
+        title: 'Contact Us | BCC',
+        description: 'Get in touch with the Baguio Cycling Community team.',
+    },
+    twitter: {
+        title: 'Contact Us | BCC',
+        description: 'Get in touch with the Baguio Cycling Community team.',
+    },
+}
+
 export default function ContactPage() {
     return (
         <main className="mx-auto max-w-4xl px-4 py-10 prose dark:prose-invert">

@@ -1,3 +1,19 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Terms of Service',
+    description: 'The terms and conditions for using Baguio Cycling Community.',
+    alternates: { canonical: '/terms' },
+    openGraph: {
+        title: 'Terms of Service | BCC',
+        description: 'The terms and conditions for using Baguio Cycling Community.',
+    },
+    twitter: {
+        title: 'Terms of Service | BCC',
+        description: 'The terms and conditions for using Baguio Cycling Community.',
+    },
+}
+
 export default function TermsPage() {
     return (
         <main className="mx-auto max-w-4xl px-4 py-10 prose dark:prose-invert">

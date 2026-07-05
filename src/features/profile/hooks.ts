@@ -1,4 +1,3 @@
-
 // ============================================================
 // src/features/profile/hooks.ts
 // ============================================================
@@ -10,8 +9,9 @@ import {
 } from './service'
 
 export const profileKeys = {
+  root:       ['profile'] as const,
   byUsername: (u: string) => ['profile', 'username', u] as const,
-  byId: (id: string) => ['profile', 'id', id] as const,
+  byId:       (id: string) => ['profile', 'id', id] as const,
 }
 
 export function useProfileByUsername(username: string) {
@@ -35,7 +35,7 @@ export function useUpdateProfile(userId: string) {
   return useMutation({
     mutationFn: (updates: Partial<Profile>) => updateProfile(userId, updates),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['profile'] })
+      qc.invalidateQueries({ queryKey: profileKeys.root })
     },
   })
 }
@@ -43,12 +43,19 @@ export function useUpdateProfile(userId: string) {
 export function useUploadAvatar(userId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (file: File) => uploadAvatar(userId, file),
-    onSuccess: (result) => {
+    mutationFn: async (file: File) => {
+      const result = await uploadAvatar(userId, file)
+      // Previously fire-and-forget: updateProfile() was called without
+      // awaiting, so invalidateQueries below could fire (and refetch)
+      // before this write actually landed, and any error was swallowed.
       if (result.url) {
-        updateProfile(userId, { avatar_url: result.url })
-        qc.invalidateQueries({ queryKey: ['profile'] })
+        const updateResult = await updateProfile(userId, { avatar_url: result.url })
+        if (updateResult.error) return { error: updateResult.error }
       }
+      return result
+    },
+    onSuccess: (result) => {
+      if (result.url) qc.invalidateQueries({ queryKey: profileKeys.root })
     },
   })
 }
@@ -56,12 +63,16 @@ export function useUploadAvatar(userId: string) {
 export function useUploadCover(userId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (file: File) => uploadCover(userId, file),
-    onSuccess: (result) => {
+    mutationFn: async (file: File) => {
+      const result = await uploadCover(userId, file)
       if (result.url) {
-        updateProfile(userId, { cover_url: result.url })
-        qc.invalidateQueries({ queryKey: ['profile'] })
+        const updateResult = await updateProfile(userId, { cover_url: result.url })
+        if (updateResult.error) return { error: updateResult.error }
       }
+      return result
+    },
+    onSuccess: (result) => {
+      if (result.url) qc.invalidateQueries({ queryKey: profileKeys.root })
     },
   })
 }

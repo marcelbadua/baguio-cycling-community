@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'eventId is required' }, { status: 400 })
   }
 
-  const supabase = (await createServerSupabaseClient()) as any
+  const supabase = await createServerSupabaseClient()
   const { error } = await supabase.from('events').update({ cover_url: coverUrl }).eq('id', eventId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

@@ -1,5 +1,3 @@
-
-
 // ============================================================
 // src/app/auth/reset-password/page.tsx
 // ============================================================
@@ -18,7 +16,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
-  const supabase = createClient() as any
+  const supabase = createClient()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

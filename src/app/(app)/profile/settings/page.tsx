@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/components/ui/use-toast'
+import { LoadingSpinner } from '@/components/loading-spinner'
 import { Loader2 } from 'lucide-react'
 import type { CyclistType } from '@/types/database'
 
@@ -74,11 +75,7 @@ export default function ProfileSettingsPage() {
 
   const initials = [profile?.first_name?.[0], profile?.last_name?.[0]].filter(Boolean).join('').toUpperCase() || '?'
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-48">
-      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-    </div>
-  )
+  if (loading) return <LoadingSpinner className="h-48 py-0" />
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

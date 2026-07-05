@@ -10,6 +10,7 @@ import { globalSearch, type SearchResults } from '@/features/search/service'
 import { ProfileCard } from '@/features/profile/components/profile-card'
 import { EventCard } from '@/features/events/components/event-card'
 import { MissingBikeCard } from '@/features/missing-bikes/components/missing-bike-card'
+import { EmptyState } from '@/components/empty-state'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -143,13 +144,11 @@ export default function SearchPage() {
 
           {/* No results */}
           {total === 0 && (
-            <div className="text-center py-20 space-y-3">
-              <p className="text-4xl">🔍</p>
-              <h3 className="font-semibold text-lg">No results for "{debouncedQuery}"</h3>
-              <p className="text-muted-foreground text-sm">
-                Try a different search term or check the spelling.
-              </p>
-            </div>
+            <EmptyState
+              emoji="🔍"
+              title={`No results for "${debouncedQuery}"`}
+              description="Try a different search term or check the spelling."
+            />
           )}
         </div>
       )}

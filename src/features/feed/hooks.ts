@@ -1,4 +1,3 @@
-
 // ============================================================
 // src/features/feed/hooks.ts
 // ============================================================
@@ -17,13 +16,38 @@ import {
   addComment,
   deleteComment,
   updatePost,
-} from '@/features/feed/services'
+} from './service'
 import type { Post } from '@/types/database'
 
 export const feedKeys = {
   all:      ['feed'] as const,
   post:     (id: string) => ['feed', 'post', id] as const,
   comments: (postId: string) => ['feed', 'comments', postId] as const,
+}
+
+// Shared cache-patch helper: bumps comment_count on a post wherever it's
+// cached (the infinite feed list AND the standalone post-detail query used
+// by the /posts/[id] share-link page), instead of invalidating and
+// refetching either of them from the server.
+function patchCommentCount(
+  qc: ReturnType<typeof useQueryClient>,
+  postId: string,
+  delta: 1 | -1
+) {
+  qc.setQueryData(feedKeys.all, (old: any) => {
+    if (!old) return old
+    return {
+      ...old,
+      pages: old.pages.map((page: Post[]) =>
+        page.map(p =>
+          p.id === postId ? { ...p, comment_count: Math.max(0, p.comment_count + delta) } : p
+        )
+      ),
+    }
+  })
+  qc.setQueryData(feedKeys.post(postId), (old: Post | undefined) =>
+    old ? { ...old, comment_count: Math.max(0, old.comment_count + delta) } : old
+  )
 }
 
 export function useFeedPosts() {
@@ -58,13 +82,16 @@ export function useDeletePost() {
   return useMutation({
     mutationFn: deletePost,
 
-    onSuccess: (result) => {
+    onSuccess: (result, id) => {
       if (result.error) {
         console.error(result.error)
         return
       }
 
       qc.invalidateQueries({ queryKey: feedKeys.all })
+      // Previously missing: without this, a cached /posts/[id] share-link
+      // page for this post would keep showing it as if still active.
+      qc.invalidateQueries({ queryKey: feedKeys.post(id) })
     },
   })
 }
@@ -118,8 +145,11 @@ export function useAddComment(postId: string) {
   return useMutation({
     mutationFn: (payload: Parameters<typeof addComment>[0]) => addComment(payload),
     onSuccess: () => {
+      // Refetch the actual comment thread (genuinely new data)...
       qc.invalidateQueries({ queryKey: feedKeys.comments(postId) })
-      qc.invalidateQueries({ queryKey: feedKeys.all })
+      // ...but just patch the count elsewhere instead of refetching every
+      // page of the feed for a change that only affects one post's counter.
+      patchCommentCount(qc, postId, 1)
     },
   })
 }
@@ -130,7 +160,7 @@ export function useDeleteComment(postId: string) {
     mutationFn: (id: string) => deleteComment(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: feedKeys.comments(postId) })
-      qc.invalidateQueries({ queryKey: feedKeys.all })
+      patchCommentCount(qc, postId, -1)
     },
   })
 }
@@ -139,6 +169,10 @@ export function useUpdatePost() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, content }: { id: string; content: string }) => updatePost(id, content),
-    onSuccess: () => qc.invalidateQueries({ queryKey: feedKeys.all }),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: feedKeys.all })
+      // Previously missing, same issue as useDeletePost above.
+      qc.invalidateQueries({ queryKey: feedKeys.post(id) })
+    },
   })
 }

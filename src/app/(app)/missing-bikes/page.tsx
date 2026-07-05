@@ -7,7 +7,7 @@
 import { useState } from 'react'
 import { useActiveMissingBikes, useAllMissingBikes } from '@/features/missing-bikes/hooks'
 import { MissingBikeCard } from '@/features/missing-bikes/components/missing-bike-card'
-import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/empty-state'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
@@ -85,29 +85,24 @@ export default function MissingBikesPage() {
           {filtered.map(r => <MissingBikeCard key={r.id} report={r} />)}
         </div>
       ) : (
-        <div className="text-center py-24 space-y-3">
-          {search ? (
-            <>
-              <p className="text-4xl">🔍</p>
-              <h3 className="font-semibold">No results for "{search}"</h3>
-              <p className="text-muted-foreground text-sm">Try a different search term.</p>
-              <Button variant="ghost" onClick={() => setSearch('')}>Clear search</Button>
-            </>
-          ) : filter === 'active' ? (
-            <>
-              <p className="text-4xl">✅</p>
-              <h3 className="font-semibold text-lg">No active missing bikes</h3>
-              <p className="text-muted-foreground text-sm">
-                Great news — the community has no active missing bike reports right now.
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-4xl">🚲</p>
-              <h3 className="font-semibold text-lg">No reports yet</h3>
-            </>
-          )}
-        </div>
+        <EmptyState
+          emoji={search ? '🔍' : filter === 'active' ? '✅' : '🚲'}
+          title={
+            search
+              ? `No results for "${search}"`
+              : filter === 'active'
+                ? 'No active missing bikes'
+                : 'No reports yet'
+          }
+          description={
+            search
+              ? 'Try a different search term.'
+              : filter === 'active'
+                ? 'Great news — the community has no active missing bike reports right now.'
+                : undefined
+          }
+          action={search ? { label: 'Clear search', onClick: () => setSearch('') } : undefined}
+        />
       )}
     </div>
   )

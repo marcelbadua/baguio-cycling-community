@@ -1,195 +1,104 @@
 // ============================================================
 // src/features/hazards/hooks.ts
 // ============================================================
-
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  getActiveHazards,
-  getAllHazards,
-  getHazardById,
-  getMyHazardReports,
-  createHazardReport,
-  updateHazardStatus,
-  deleteHazardReport,
-  uploadHazardPhoto,
-  confirmHazard,
-  removeConfirmation,
-  updateHazardReport,
-} from "./service";
-
-import type { HazardStatus } from "@/types/database";
-
-// ============================================================
-// Query Keys
-// ============================================================
+  getActiveHazards, getAllHazards, getHazardById, getMyHazardReports,
+  createHazardReport, updateHazardStatus, deleteHazardReport,
+  uploadHazardPhoto, confirmHazard, removeConfirmation, updateHazardReport,
+} from './service'
+import type { HazardStatus, HazardType } from '@/types/database'
 
 export const hazardKeys = {
-  root: ["hazards"] as const,
-  active: ["hazards", "active"] as const,
-  all: (status?: HazardStatus) =>
-    ["hazards", "all", status ?? ""] as const,
-  mine: (userId: string) =>
-    ["hazards", "mine", userId] as const,
-  detail: (hazardId: string) =>
-    ["hazards", "detail", hazardId] as const,
-};
-
-// ============================================================
-// Queries
-// ============================================================
+  root:   ['hazards'] as const,
+  active: ['hazards', 'active'] as const,
+  all:    (s?: string) => ['hazards', 'all', s ?? ''] as const,
+  mine:   (uid: string) => ['hazards', 'mine', uid] as const,
+  detail: (id: string) => ['hazards', 'detail', id] as const,
+}
 
 export function useActiveHazards() {
-  return useQuery({
-    queryKey: hazardKeys.active,
-    queryFn: getActiveHazards,
-  });
+  return useQuery({ queryKey: hazardKeys.active, queryFn: getActiveHazards })
 }
 
 export function useAllHazards(filter?: HazardStatus) {
   return useQuery({
     queryKey: hazardKeys.all(filter),
     queryFn: () => getAllHazards(filter),
-  });
+  })
 }
 
 export function useHazardById(id: string) {
   return useQuery({
     queryKey: hazardKeys.detail(id),
-    queryFn: () => getHazardById(id),
-    enabled: !!id,
-  });
+    queryFn:  () => getHazardById(id),
+    enabled:  !!id,
+  })
 }
 
 export function useMyHazardReports(reporterId: string) {
   return useQuery({
     queryKey: hazardKeys.mine(reporterId),
-    queryFn: () => getMyHazardReports(reporterId),
-    enabled: !!reporterId,
-  });
+    queryFn:  () => getMyHazardReports(reporterId),
+    enabled:  !!reporterId,
+  })
 }
 
-// ============================================================
-// Mutations
-// ============================================================
-
 export function useCreateHazardReport() {
-  const qc = useQueryClient();
-
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: createHazardReport,
-
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: hazardKeys.root,
-      });
-    },
-  });
+    mutationFn: (p: Parameters<typeof createHazardReport>[0]) => createHazardReport(p),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: hazardKeys.root }),
+  })
 }
 
 export function useUpdateHazardStatus() {
-  const qc = useQueryClient();
-
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({
-      id,
-      status,
-    }: {
-      id: string;
-      status: HazardStatus;
-    }) => updateHazardStatus(id, status),
-
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: hazardKeys.root,
-      });
-    },
-  });
+    mutationFn: ({ id, status }: { id: string; status: HazardStatus }) =>
+      updateHazardStatus(id, status),
+    onSuccess: () => qc.invalidateQueries({ queryKey: hazardKeys.root }),
+  })
 }
 
 export function useDeleteHazardReport() {
-  const qc = useQueryClient();
-
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: deleteHazardReport,
-
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: hazardKeys.root,
-      });
-    },
-  });
+    mutationFn: (id: string) => deleteHazardReport(id),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: hazardKeys.root }),
+  })
 }
 
 export function useUploadHazardPhoto() {
   return useMutation({
-    mutationFn: ({
-      userId,
-      file,
-    }: {
-      userId: string;
-      file: File;
-    }) => uploadHazardPhoto(userId, file),
-  });
+    mutationFn: ({ userId, file }: { userId: string; file: File }) =>
+      uploadHazardPhoto(userId, file),
+  })
 }
 
 export function useConfirmHazard(hazardId: string) {
-  const qc = useQueryClient();
-
+  const qc = useQueryClient()
   const invalidate = () => {
-    qc.invalidateQueries({
-      queryKey: hazardKeys.detail(hazardId),
-    });
-
-    qc.invalidateQueries({
-      queryKey: hazardKeys.root,
-    });
-  };
-
+    qc.invalidateQueries({ queryKey: hazardKeys.detail(hazardId) })
+    qc.invalidateQueries({ queryKey: hazardKeys.root })
+  }
   const confirm = useMutation({
-    mutationFn: ({
-      userId,
-      fixed,
-    }: {
-      userId: string;
-      fixed: boolean;
-    }) => confirmHazard(hazardId, userId, fixed),
-
+    mutationFn: ({ userId, fixed }: { userId: string; fixed: boolean }) =>
+      confirmHazard(hazardId, userId, fixed),
     onSuccess: invalidate,
-  });
-
+  })
   const remove = useMutation({
-    mutationFn: (userId: string) =>
-      removeConfirmation(hazardId, userId),
-
+    mutationFn: (userId: string) => removeConfirmation(hazardId, userId),
     onSuccess: invalidate,
-  });
-
-  return {
-    confirm,
-    remove,
-  };
+  })
+  return { confirm, remove }
 }
 
 export function useUpdateHazardReport() {
-  const qc = useQueryClient();
-
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({
-      id,
-      updates,
-    }: {
-      id: string;
-      updates: {
-        description?: string;
-        landmark?: string;
-        barangay?: string;
-      };
-    }) => updateHazardReport(id, updates),
-
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: hazardKeys.root,
-      });
-    },
-  });
+    mutationFn: ({ id, updates }: { id: string; updates: { description?: string; landmark?: string; barangay?: string } }) =>
+      updateHazardReport(id, updates),
+    onSuccess: () => qc.invalidateQueries({ queryKey: hazardKeys.root }),
+  })
 }

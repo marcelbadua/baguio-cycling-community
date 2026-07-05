@@ -6,6 +6,7 @@
 import { use } from 'react'
 import { notFound, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useBikeById } from '@/features/bikes/hooks'
 import { useAuth } from '@/features/auth/hooks'
 import { Badge } from '@/components/ui/badge'
@@ -43,9 +44,15 @@ export default function BikeDetailPage({ params }: { params: Promise<{ id: strin
       </Button>
 
       {/* Photo */}
-      <div className="w-full h-64 md:h-80 rounded-xl overflow-hidden bg-muted">
+      <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden bg-muted">
         {bike.photo_url ? (
-          <img src={bike.photo_url} alt={label} className="w-full h-full object-cover" />
+          <Image
+            src={bike.photo_url}
+            alt={label}
+            fill
+            sizes="(max-width: 768px) 100vw, 768px"
+            className="object-cover"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Bike className="h-20 w-20 text-muted-foreground opacity-30" />

@@ -15,6 +15,10 @@ export function Footer() {
             Terms of Service
           </Link>
 
+          <Link href="/guidelines" className="hover:underline">
+            Community Guidelines
+          </Link>
+
           <Link href="/contact" className="hover:underline">
             Contact
           </Link>

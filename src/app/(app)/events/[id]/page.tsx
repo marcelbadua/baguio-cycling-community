@@ -6,6 +6,7 @@
 import { use, useState } from 'react'
 import { notFound, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   useEventById, useRsvp, useEventAttendees,
   useUpdateEvent, useDeleteEvent, useApproveRsvp,
@@ -123,9 +124,15 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
       </Button>
 
       {/* Cover */}
-      <div className="w-full h-52 md:h-72 rounded-xl overflow-hidden bg-muted">
+      <div className="relative w-full h-52 md:h-72 rounded-xl overflow-hidden bg-muted">
         {event.cover_url ? (
-          <img src={event.cover_url} alt={event.title} className="w-full h-full object-cover" />
+          <Image
+            src={event.cover_url}
+            alt={event.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 768px"
+            className="object-cover"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Calendar className="h-20 w-20 text-muted-foreground opacity-20" />

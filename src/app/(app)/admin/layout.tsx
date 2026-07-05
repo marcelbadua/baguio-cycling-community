@@ -8,7 +8,8 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { Loader2, LayoutDashboard, Users, FileText, Calendar, AlertTriangle, Bike, Megaphone } from 'lucide-react'
+import { LoadingSpinner } from '@/components/loading-spinner'
+import { LayoutDashboard, Users, FileText, Calendar, AlertTriangle, Bike, Megaphone } from 'lucide-react'
 
 const NAV = [
   { href: '/admin',              icon: LayoutDashboard, label: 'Overview'      },
@@ -30,11 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!loading && !profile) router.replace('/login')
   }, [loading, profile, router])
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-    </div>
-  )
+  if (loading) return <LoadingSpinner className="min-h-screen" />
 
   if (profile?.role !== 'admin') return null
 

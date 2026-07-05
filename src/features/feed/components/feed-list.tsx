@@ -6,6 +6,7 @@ import { useFeedPosts } from '@/features/feed/hooks'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/empty-state'
 
 import { Loader2, RefreshCw } from 'lucide-react'
 
@@ -78,17 +79,11 @@ export function FeedList({
 
   if (!posts.length) {
     return (
-      <div className="text-center py-24 space-y-3">
-        <p className="text-4xl">🚴</p>
-
-        <h3 className="font-semibold text-lg">
-          The feed is quiet
-        </h3>
-
-        <p className="text-muted-foreground text-sm">
-          Be the first to post something!
-        </p>
-      </div>
+      <EmptyState
+        emoji="🚴"
+        title="The feed is quiet"
+        description="Be the first to post something!"
+      />
     )
   }
 

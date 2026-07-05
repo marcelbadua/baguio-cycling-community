@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'reportId is required' }, { status: 400 })
   }
 
-  const supabase = (await createServerSupabaseClient()) as any
+  const supabase = await createServerSupabaseClient()
   const { error } = await supabase
     .from('missing_bikes')
     .update({ photos: photos ?? [], updated_at: new Date().toISOString() })

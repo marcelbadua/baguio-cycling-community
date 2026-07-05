@@ -10,6 +10,7 @@ import {
 import type { Event, RsvpStatus } from '@/types/database'
 
 export const eventKeys = {
+  root:      ['events'] as const,
   all:       (filter: string) => ['events', filter] as const,
   mine:      (uid: string)    => ['events', 'mine', uid] as const,
   detail:    (id: string)     => ['events', 'detail', id] as const,
@@ -43,7 +44,7 @@ export function useCreateEvent() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: Partial<Event>) => createEvent(payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: eventKeys.root }),
   })
 }
 
@@ -52,7 +53,7 @@ export function useUpdateEvent() {
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Event> }) => updateEvent(id, updates),
     onSuccess: (_, { id }) => {
-      qc.invalidateQueries({ queryKey: ['events'] })
+      qc.invalidateQueries({ queryKey: eventKeys.root })
       qc.invalidateQueries({ queryKey: eventKeys.detail(id) })
     },
   })
@@ -62,7 +63,7 @@ export function useDeleteEvent() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => deleteEvent(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: eventKeys.root }),
   })
 }
 
@@ -77,7 +78,7 @@ export function useRsvp(eventId: string) {
   const qc = useQueryClient()
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: eventKeys.detail(eventId) })
-    qc.invalidateQueries({ queryKey: ['events'] })
+    qc.invalidateQueries({ queryKey: eventKeys.root })
     qc.invalidateQueries({ queryKey: eventKeys.attendees(eventId) })
   }
   const upsert = useMutation({

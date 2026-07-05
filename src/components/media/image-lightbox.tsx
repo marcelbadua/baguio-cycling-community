@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import Image from 'next/image'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Props {
@@ -63,11 +64,15 @@ export function ImageLightbox({
       )}
 
       {/* Image */}
-      <img
-        src={current}
-        className="max-h-[90vh] max-w-[90vw] object-contain"
-        alt=""
-      />
+      <div className="relative w-[90vw] h-[90vh]">
+        <Image
+          src={current}
+          fill
+          sizes="90vw"
+          className="object-contain"
+          alt=""
+        />
+      </div>
     </div>
   )
 }

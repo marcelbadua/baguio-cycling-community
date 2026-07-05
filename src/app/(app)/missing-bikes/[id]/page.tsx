@@ -3,6 +3,7 @@
 import { use, useState, useRef } from 'react'
 import { notFound, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   useMissingBikeById, useMarkAsRecovered, useUpdateMissingReport,
   useUploadMissingPhotos, useMissingBikeComments, useAddMissingBikeComment,
@@ -122,7 +123,13 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
               className={`relative overflow-hidden cursor-zoom-in bg-muted ${allPhotos.length === 1 ? 'aspect-video' : 'aspect-square'} ${allPhotos.length === 3 && i === 0 ? 'row-span-2' : ''}`}
               onClick={() => setLightbox(src)}
             >
-              <img src={src} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" alt="" />
+              <Image
+                src={src}
+                fill
+                sizes="(max-width: 768px) 50vw, 384px"
+                className="object-cover hover:scale-105 transition-transform duration-300"
+                alt=""
+              />
               {i === 3 && allPhotos.length > 4 && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <span className="text-white text-xl font-bold">+{allPhotos.length - 4}</span>
@@ -317,7 +324,9 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
 
       {lightbox && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setLightbox(null)}>
-          <img src={lightbox} className="max-w-full max-h-full object-contain rounded-lg" alt="" />
+          <div className="relative w-[90vw] h-[90vh]">
+            <Image src={lightbox} fill sizes="90vw" className="object-contain rounded-lg" alt="" />
+          </div>
           <button className="absolute top-4 right-4 text-white/80 hover:text-white text-xl" onClick={() => setLightbox(null)}>✕</button>
         </div>
       )}
