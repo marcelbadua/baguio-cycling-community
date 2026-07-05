@@ -12,7 +12,7 @@ export type PostType =
 export type EventDifficulty = 'easy' | 'moderate' | 'hard' | 'expert'
 export type EventPace = 'casual' | 'moderate' | 'fast' | 'race'
 export type RsvpStatus = 'going' | 'interested'
-export type HazardType = 'pothole' | 'open_manhole' | 'drainage_grill' | 'broken_glass' | 'construction' | 'landslide' | 'flood' | 'other'
+export type HazardType = 'pothole' | 'open_manhole' | 'broken_glass' | 'construction' | 'landslide' | 'flood' | 'other'
 export type HazardStatus = 'active' | 'fixed'
 export type MissingBikeStatus = 'missing' | 'recovered'
 export type UserRole = 'member' | 'admin'
@@ -160,6 +160,21 @@ export interface HazardReport {
   confirmed_by_me?: boolean
 }
 
+export interface HazardConfirmation {
+  id: string
+  hazard_id: string
+  user_id: string
+  fixed: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface PostLike {
+  post_id: string
+  user_id: string
+  created_at: string
+}
+
 // ─────────────────────────────────────────────────────────────
 // Supabase Database generic wrapper
 // ─────────────────────────────────────────────────────────────
@@ -175,7 +190,11 @@ export type Database = {
       events: { Row: Event; Insert: Partial<Event>; Update: Partial<Event> }
       event_rsvps: { Row: EventRsvp; Insert: Partial<EventRsvp>; Update: Partial<EventRsvp> }
       hazard_reports: { Row: HazardReport; Insert: Partial<HazardReport>; Update: Partial<HazardReport> }
+      hazard_confirmations: { Row: HazardConfirmation; Insert: Partial<HazardConfirmation>; Update: Partial<HazardConfirmation> }
+      post_likes: { Row: PostLike; Insert: Partial<PostLike>; Update: Partial<PostLike> }
     }
+    Views: {}
+    Functions: {}
     Enums: {
       cyclist_type: CyclistType
       post_type: PostType
@@ -187,5 +206,6 @@ export type Database = {
       missing_bike_status: MissingBikeStatus
       user_role: UserRole
     }
+    CompositeTypes: {}
   }
 }
