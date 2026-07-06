@@ -29,7 +29,8 @@ export function Map({
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: 'https://tiles.openfreemap.org/styles/liberty',
+      // style: `https://api.maptiler.com/maps/basic-v2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`,
+      style: 'https://tiles.openfreemap.org/styles/positron',
       center: [longitude, latitude],
       zoom,
     })
