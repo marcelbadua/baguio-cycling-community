@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { ImagePlus, X, Loader2, AlertTriangle } from 'lucide-react'
-import type { Bike } from '@/types/database'
+import type { Bike } from '@/types/models'
 
 const reportSchema = z.object({
   last_seen_location: z.string().min(1, 'Last seen location is required'),

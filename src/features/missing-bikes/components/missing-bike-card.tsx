@@ -7,13 +7,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MapPin, Calendar, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { formatDate, formatRelative, getInitials, getDisplayName } from '@/lib/utils'
-import type { MissingBike } from '@/types/database'
+import type { MissingBikeWithRelations } from '@/types/models'
 
-interface Props { report: MissingBike }
+interface Props { report: MissingBikeWithRelations }
 
 export function MissingBikeCard({ report }: Props) {
-  const bike  = report.bike  as any
-  const owner = report.owner as any
+  const bike  = report.bike
+  const owner = report.owner
 
   const bikeName = bike?.nickname
     ? `${bike.nickname} (${bike.brand}${bike.model ? ` ${bike.model}` : ''})`

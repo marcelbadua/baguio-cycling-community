@@ -2,7 +2,7 @@
 // src/features/feed/service.ts
 // ============================================================
 import { createClient } from '@/lib/supabase/client'
-import type { Post, Comment } from '@/types/database'
+import type { Post, Comment, PostWithAuthor, CommentWithAuthor } from '@/types/models'
 
 const supabase = createClient() as any
 
@@ -12,7 +12,7 @@ const POST_SELECT = `
   liked_by_me:post_likes(user_id)
 `
 
-export async function getFeedPosts(page = 0, pageSize = 15): Promise<Post[]> {
+export async function getFeedPosts(page = 0, pageSize = 15): Promise<PostWithAuthor[]> {
   const from = page * pageSize
   const to = from + pageSize - 1
 
@@ -72,7 +72,7 @@ export async function getFeedPosts(page = 0, pageSize = 15): Promise<Post[]> {
   })
 }
 
-export async function getPostById(id: string): Promise<Post | null> {
+export async function getPostById(id: string): Promise<PostWithAuthor | null> {
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data, error } = await supabase
@@ -100,13 +100,13 @@ export async function createPost(payload: {
   content?: string
   photos?: string[]
   post_type?: Post['post_type']
-}): Promise<{ data?: Post; error?: string }> {
+}): Promise<{ data?: PostWithAuthor; error?: string }> {
   const { data, error } = await supabase
     .from('posts')
     .insert({ ...payload, post_type: payload.post_type ?? 'text' })
     .select(POST_SELECT)
     .single()
-  return error ? { error: error.message } : { data: data as Post }
+  return error ? { error: error.message } : { data: data as PostWithAuthor }
 }
 
 export async function deletePost(id: string): Promise<{ error?: string }> {
@@ -142,7 +142,7 @@ export async function uploadPostPhotos(userId: string, files: File[]): Promise<s
 
 // ── Comments ─────────────────────────────────────────────────
 
-export async function getComments(postId: string): Promise<Comment[]> {
+export async function getComments(postId: string): Promise<CommentWithAuthor[]> {
   const { data } = await supabase
     .from('comments')
     .select('*, author:profiles!author_id(id, username, display_name, first_name, last_name, avatar_url)')
@@ -181,7 +181,7 @@ export async function updatePost(id: string, content: string): Promise<{ error?:
   return error ? { error: error.message } : {}
 }
 
-export async function getCommentPreview(postId: string): Promise<Comment[]> {
+export async function getCommentPreview(postId: string): Promise<CommentWithAuthor[]> {
   const { data } = await supabase
     .from('comments')
     .select(`

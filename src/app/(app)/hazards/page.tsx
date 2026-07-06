@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/sheet'
 import { useToast } from '@/components/ui/use-toast'
 import { Plus, AlertTriangle } from 'lucide-react'
-import type { HazardStatus, HazardType } from '@/types/database'
+import type { HazardStatus, HazardType } from '@/types/models'
 
 type Filter = 'active' | 'fixed' | 'all'
 

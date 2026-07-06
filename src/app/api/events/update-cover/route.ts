@@ -1,6 +1,10 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
+const supabase = await createServerSupabaseClient()
+
+const table = supabase.from('events')
+
 export async function POST(req: NextRequest) {
   let body: { eventId?: string; coverUrl?: string }
   try {

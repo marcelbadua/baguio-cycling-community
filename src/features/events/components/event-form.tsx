@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Upload, X, Loader2 } from 'lucide-react'
-import type { Event, EventDifficulty, EventPace } from '@/types/database'
+import type { Event, EventDifficulty, EventPace } from '@/types/models'
 
 const PACE_OPTIONS: { value: EventPace; label: string }[] = [
   { value: 'casual',   label: 'Casual — easy going, no drop' },

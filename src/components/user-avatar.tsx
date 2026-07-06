@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
 import { getInitials } from '@/lib/utils'
 import { cn } from '@/lib/utils'
-import type { Profile } from '@/types/database'
+import type { Profile } from '@/types/models'
 
 interface Props {
   profile:   Pick<Profile, 'avatar_url' | 'first_name' | 'last_name' | 'username'>

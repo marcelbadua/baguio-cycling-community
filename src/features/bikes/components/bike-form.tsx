@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Upload, X } from 'lucide-react'
-import type { Bike } from '@/types/database'
+import type { Bike } from '@/types/models'
 
 const WHEEL_SIZES = ['20"', '24"', '26"', '27.5"', '29"', '700c', '650b', 'Other']
 const FRAME_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '13"', '15"', '17"', '19"', '21"', 'Other']

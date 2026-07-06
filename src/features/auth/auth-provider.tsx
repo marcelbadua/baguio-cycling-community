@@ -14,7 +14,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
-import type { Profile } from '@/types/database'
+import type { Profile } from '@/types/models'
 
 interface AuthContextValue {
   user: User | null

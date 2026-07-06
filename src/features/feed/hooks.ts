@@ -17,7 +17,7 @@ import {
   deleteComment,
   updatePost,
 } from './service'
-import type { Post } from '@/types/database'
+import type { PostWithAuthor } from '@/types/models'
 
 export const feedKeys = {
   all:      ['feed'] as const,
@@ -38,15 +38,15 @@ function patchCommentCount(
     if (!old) return old
     return {
       ...old,
-      pages: old.pages.map((page: Post[]) =>
+      pages: old.pages.map((page: PostWithAuthor[]) =>
         page.map(p =>
-          p.id === postId ? { ...p, comment_count: Math.max(0, p.comment_count + delta) } : p
+          p.id === postId ? { ...p, comment_count: Math.max(0, (p.comment_count ?? 0) + delta) } : p
         )
       ),
     }
   })
-  qc.setQueryData(feedKeys.post(postId), (old: Post | undefined) =>
-    old ? { ...old, comment_count: Math.max(0, old.comment_count + delta) } : old
+  qc.setQueryData(feedKeys.post(postId), (old: PostWithAuthor | undefined) =>
+    old ? { ...old, comment_count: Math.max(0, (old.comment_count ?? 0) + delta) } : old
   )
 }
 
@@ -108,10 +108,10 @@ export function useToggleLike() {
         if (!old) return old
         return {
           ...old,
-          pages: old.pages.map((page: Post[]) =>
+          pages: old.pages.map((page: PostWithAuthor[]) =>
             page.map(p =>
               p.id === postId
-                ? { ...p, liked_by_me: !liked, like_count: p.like_count + (liked ? -1 : 1) }
+                ? { ...p, liked_by_me: !liked, like_count: (p.like_count ?? 0) + (liked ? -1 : 1) }
                 : p
             )
           ),

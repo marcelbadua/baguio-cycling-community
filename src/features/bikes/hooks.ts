@@ -3,13 +3,14 @@
 // src/features/bikes/hooks.ts
 // ============================================================
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { Bike } from '@/types/database'
+import type { Bike } from '@/types/models'
 import {
   getMyBikes, getBikeById, createBike,
   updateBike, deleteBike, uploadBikePhoto,
 } from './service'
 
 export const bikeKeys = {
+  root: ['bikes'] as const,
   mine: (uid: string) => ['bikes', 'mine', uid] as const,
   detail: (id: string) => ['bikes', 'detail', id] as const,
 }

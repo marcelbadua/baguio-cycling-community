@@ -5,7 +5,7 @@
 'use client'
 
 import { HAZARD_TYPE_CONFIG } from '../constants'
-import type { HazardType } from '@/types/database'
+import type { HazardType } from '@/types/models'
 import { cn } from '@/lib/utils'
 
 interface Props {

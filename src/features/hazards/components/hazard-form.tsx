@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { HazardTypePicker } from './hazard-type-picker'
 import { BARANGAYS } from "@/lib/constants/barangays"
 import { Upload, X, Loader2 } from 'lucide-react'
-import type { HazardType } from '@/types/database'
+import type { HazardType } from '@/types/models'
 import { Input } from '@/components/ui/input'
 
 const hazardSchema = z.object({

@@ -1,4 +1,3 @@
-
 // ─────────────────────────────────────────────────────────────
 // src/lib/supabase/middleware.ts
 // Middleware Supabase client
@@ -28,7 +27,23 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (error: any) {
+    // Invalid/expired refresh token cookie (e.g. leftover from a previous
+    // session, a revoked session, or switching Supabase projects/keys).
+    // Without this catch, getUser() throws here and crashes the request
+    // instead of just meaning "not logged in" — treat it as logged out
+    // and clear the stale cookie so it doesn't keep failing on every
+    // subsequent request.
+    if (error?.code === 'refresh_token_not_found' || error?.name === 'AuthApiError') {
+      await supabase.auth.signOut()
+    } else {
+      throw error
+    }
+  }
 
   const protectedPaths = [
   '/feed',  

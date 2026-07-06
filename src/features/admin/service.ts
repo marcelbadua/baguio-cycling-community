@@ -2,7 +2,10 @@
 // src/features/admin/service.ts
 // ============================================================
 import { createClient } from '@/lib/supabase/client'
-import type { Profile, Post, Event, HazardReport, MissingBike, UserRole } from '@/types/database'
+import type {
+  Profile, Post, Event, HazardReport, MissingBike, UserRole,
+  PostWithAuthor, EventWithOrganizer, HazardReportWithReporter, MissingBikeWithRelations,
+} from '@/types/models'
 
 const supabase = createClient() as any
 
@@ -86,14 +89,14 @@ export async function setUserActive(
 
 // ── Posts ─────────────────────────────────────────────────────
 
-export async function getAdminPosts(page = 0, pageSize = 20): Promise<Post[]> {
+export async function getAdminPosts(page = 0, pageSize = 20): Promise<PostWithAuthor[]> {
   const from = page * pageSize
   const { data } = await supabase
     .from('posts')
     .select('*, author:profiles!author_id(id, username, display_name, first_name, last_name, avatar_url)')
     .order('created_at', { ascending: false })
     .range(from, from + pageSize - 1)
-  return (data ?? []) as Post[]
+  return (data ?? []) as PostWithAuthor[]
 }
 
 export async function adminDeletePost(id: string): Promise<{ error?: string }> {
@@ -116,16 +119,14 @@ export async function adminPinPost(
 
 // ── Events ─────────────────────────────────────────────────────
 
-export async function getAdminEvents(page = 0, pageSize = 20): Promise<Event[]> {
+export async function getAdminEvents(page = 0, pageSize = 20): Promise<EventWithOrganizer[]> {
   const from = page * pageSize
   const { data } = await supabase
     .from('events')
-// getAdminEvents — fix organizer join
-.select('*, organizer:profiles!organizer_id(id, username, display_name, first_name, last_name, avatar_url)')
-
+    .select('*, organizer:profiles!organizer_id(id, username, display_name, first_name, last_name, avatar_url)')
     .order('created_at', { ascending: false })
     .range(from, from + pageSize - 1)
-  return (data ?? []) as Event[]
+  return (data ?? []) as EventWithOrganizer[]
 }
 
 export async function adminDeleteEvent(id: string): Promise<{ error?: string }> {
@@ -138,16 +139,14 @@ export async function adminDeleteEvent(id: string): Promise<{ error?: string }> 
 
 // ── Hazards ───────────────────────────────────────────────────
 
-export async function getAdminHazards(page = 0, pageSize = 20): Promise<HazardReport[]> {
+export async function getAdminHazards(page = 0, pageSize = 20): Promise<HazardReportWithReporter[]> {
   const from = page * pageSize
   const { data } = await supabase
     .from('hazard_reports')
-// getAdminHazards — fix reporter join
-.select('*, reporter:profiles!reporter_id(id, username, display_name, first_name, last_name, avatar_url)')
-
+    .select('*, reporter:profiles!reporter_id(id, username, display_name, first_name, last_name, avatar_url)')
     .order('created_at', { ascending: false })
     .range(from, from + pageSize - 1)
-  return (data ?? []) as HazardReport[]
+  return (data ?? []) as HazardReportWithReporter[]
 }
 
 export async function adminDeleteHazard(id: string): Promise<{ error?: string }> {
@@ -170,15 +169,14 @@ export async function adminSetHazardStatus(
 
 // ── Missing Bikes ──────────────────────────────────────────────
 
-export async function getAdminMissingBikes(page = 0, pageSize = 20): Promise<MissingBike[]> {
+export async function getAdminMissingBikes(page = 0, pageSize = 20): Promise<MissingBikeWithRelations[]> {
   const from = page * pageSize
   const { data } = await supabase
     .from('missing_bikes')
-// getAdminMissingBikes — fix owner join
-.select('*, bike:bikes(*), owner:profiles!owner_id(id, username, display_name, first_name, last_name, avatar_url)')
+    .select('*, bike:bikes(*), owner:profiles!owner_id(id, username, display_name, first_name, last_name, avatar_url)')
     .order('created_at', { ascending: false })
     .range(from, from + pageSize - 1)
-  return (data ?? []) as MissingBike[]
+  return (data ?? []) as MissingBikeWithRelations[]
 }
 
 export async function adminUpdateMissingStatus(

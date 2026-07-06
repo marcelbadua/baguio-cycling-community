@@ -2,7 +2,7 @@
 // src/features/bikes/service.ts
 // ============================================================
 import { createClient } from '@/lib/supabase/client'
-import type { Bike } from '@/types/database'
+import type { Bike } from '@/types/models'
 import { uploadToBucket } from '@/lib/supabase/upload'
 
 const supabase = createClient() as any

@@ -21,7 +21,7 @@ import {
 import { useToast } from '@/components/ui/use-toast'
 import { MoreHorizontal, Search, ShieldCheck, ShieldOff, UserX, UserCheck } from 'lucide-react'
 import { formatDate, getInitials, getDisplayName } from '@/lib/utils'
-import type { Profile } from '@/types/database'
+import type { Profile } from '@/types/models'
 
 export default function AdminUsersPage() {
   const { toast } = useToast()

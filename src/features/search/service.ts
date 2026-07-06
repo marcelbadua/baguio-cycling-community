@@ -1,12 +1,12 @@
 import { createClient } from '@/lib/supabase/client'
-import type { Profile, Event, MissingBike } from '@/types/database'
+import type { Profile, EventWithOrganizer, MissingBikeWithRelations } from '@/types/models'
 
 const supabase = createClient() as any
 
 export interface SearchResults {
   cyclists: Profile[]
-  events: Event[]
-  missingBikes: MissingBike[]
+  events: EventWithOrganizer[]
+  missingBikes: MissingBikeWithRelations[]
 }
 
 export async function globalSearch(query: string): Promise<SearchResults> {
@@ -40,7 +40,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
 
   return {
     cyclists:     cyclists.data ?? [],
-    events:       (events.data ?? []) as Event[],
-    missingBikes: (missing.data ?? []) as MissingBike[],
+    events:       (events.data ?? []) as EventWithOrganizer[],
+    missingBikes: (missing.data ?? []) as MissingBikeWithRelations[],
   }
 }

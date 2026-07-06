@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Trash2, Send, Loader2 } from 'lucide-react'
 import { formatRelative, getInitials, getDisplayName } from '@/lib/utils'
-import type { Comment } from '@/types/database'
+import type { CommentWithAuthor } from '@/types/models'
 
 interface Props {
   postId: string
@@ -115,13 +115,13 @@ export function CommentSection({ postId }: Props) {
 function CommentItem({
   comment, currentUserId, isAdmin, onDelete, isDeleting,
 }: {
-  comment: Comment
+  comment: CommentWithAuthor
   currentUserId?: string
   isAdmin: boolean
   onDelete: () => void
   isDeleting: boolean
 }) {
-  const author = comment.author as any
+  const author = comment.author
   const authorName = author ? getDisplayName(author) : 'Unknown'
   const authorInitials = author ? getInitials(author.first_name, author.last_name) : '?'
   const isOwner = currentUserId === comment.author_id

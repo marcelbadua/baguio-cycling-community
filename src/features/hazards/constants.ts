@@ -1,7 +1,7 @@
 // ============================================================
 // src/features/hazards/constants.ts
 // ============================================================
-import type { HazardType } from '@/types/database'
+import type { HazardType } from '@/types/models'
 
 export const HAZARD_TYPE_CONFIG: Record<HazardType, { label: string; emoji: string; color: string }> = {
   pothole:      { label: 'Pothole',       emoji: '🕳️',  color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400' },

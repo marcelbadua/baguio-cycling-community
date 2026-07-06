@@ -10,7 +10,7 @@ import {
   TrendingUp, CheckCircle2, Star,
 } from 'lucide-react'
 import { formatDate, getInitials, getDisplayName } from '@/lib/utils'
-import type { Event } from '@/types/database'
+import type { EventWithOrganizer } from '@/types/models'
 
 const DIFFICULTY_COLORS = {
   easy:     'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
@@ -24,18 +24,18 @@ const PACE_LABELS = {
 }
 
 interface Props {
-  event: Event
+  event: EventWithOrganizer
   compact?: boolean
 }
 
 export function EventCard({ event, compact = false }: Props) {
   const router = useRouter()
-  const organizer = event.organizer as any
+  const organizer = event.organizer
   const organizerName = organizer ? getDisplayName(organizer) : 'Unknown'
   const organizerInitials = organizer ? getInitials(organizer.first_name, organizer.last_name) : '?'
   const isPast = new Date(event.event_date) < new Date(new Date().toDateString())
   const isFull = event.max_participants
-    ? event.rsvp_going_count >= event.max_participants
+    ? (event.rsvp_going_count ?? 0) >= event.max_participants
     : false
 
   return (

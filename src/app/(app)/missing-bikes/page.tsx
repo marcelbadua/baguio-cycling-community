@@ -27,7 +27,7 @@ export default function MissingBikesPage() {
 
   const filtered = search.trim()
     ? reports.filter(r => {
-        const bike  = r.bike  as any
+        const bike  = r.bike
         const query = search.toLowerCase()
         return (
           bike?.brand?.toLowerCase().includes(query) ||

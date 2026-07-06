@@ -2,7 +2,7 @@
 // src/features/hazards/service.ts
 // ============================================================
 import { createClient } from '@/lib/supabase/client'
-import type { HazardReport, HazardType, HazardStatus } from '@/types/database'
+import type { HazardReport, HazardType, HazardStatus, HazardReportWithReporter } from '@/types/models'
 
 const supabase = createClient() as any
 
@@ -12,7 +12,7 @@ const HAZARD_SELECT = `
   confirmed_by_me:hazard_confirmations(user_id)
 `
 
-export async function getActiveHazards(): Promise<HazardReport[]> {
+export async function getActiveHazards(): Promise<HazardReportWithReporter[]> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -36,7 +36,7 @@ export async function getActiveHazards(): Promise<HazardReport[]> {
 
 export async function getAllHazards(
   filter?: HazardStatus
-): Promise<HazardReport[]> {
+): Promise<HazardReportWithReporter[]> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -65,7 +65,7 @@ export async function getAllHazards(
 
 export async function getHazardById(
   id: string
-): Promise<HazardReport | null> {
+): Promise<HazardReportWithReporter | null> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -88,7 +88,7 @@ export async function getHazardById(
 
 export async function getMyHazardReports(
   reporterId: string
-): Promise<HazardReport[]> {
+): Promise<HazardReportWithReporter[]> {
   const { data } = await supabase
     .from('hazard_reports')
     .select(HAZARD_SELECT)

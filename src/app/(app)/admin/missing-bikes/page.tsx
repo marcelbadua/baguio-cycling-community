@@ -19,13 +19,13 @@ import {
 import { useToast } from '@/components/ui/use-toast'
 import { MoreHorizontal, Bike, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { formatDate, getInitials, getDisplayName } from '@/lib/utils'
-import type { MissingBike } from '@/types/database'
+import type { MissingBikeWithRelations } from '@/types/models'
 
 export default function AdminMissingBikesPage() {
   const { toast } = useToast()
   const qc = useQueryClient()
   const [page, setPage] = useState(0)
-  const [confirmRecover, setConfirmRecover] = useState<MissingBike | null>(null)
+  const [confirmRecover, setConfirmRecover] = useState<MissingBikeWithRelations | null>(null)
 
   const { data: reports, isLoading } = useQuery({
     queryKey: ['admin', 'missing-bikes', page],
@@ -56,8 +56,8 @@ export default function AdminMissingBikesPage() {
         headers={['Bike', 'Owner', 'Location', 'Status', 'Reported', '']}
         isLoading={isLoading}
         rows={displayed.map(report => {
-          const bike  = report.bike  as any
-          const owner = report.owner as any
+          const bike  = report.bike
+          const owner = report.owner
           return (
             <tr key={report.id} className="border-b hover:bg-muted/30">
               {/* Bike */}
@@ -172,9 +172,9 @@ export default function AdminMissingBikesPage() {
             <DialogDescription>
               Mark{' '}
               <strong>
-                {(confirmRecover?.bike as any)?.brand} {(confirmRecover?.bike as any)?.model ?? ''}
+                {confirmRecover?.bike?.brand} {confirmRecover?.bike?.model ?? ''}
               </strong>{' '}
-              owned by <strong>{getDisplayName(confirmRecover?.owner as any)}</strong> as recovered?
+              owned by <strong>{getDisplayName(confirmRecover?.owner)}</strong> as recovered?
               This will remove it from the active missing bikes list.
             </DialogDescription>
           </DialogHeader>

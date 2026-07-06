@@ -2,7 +2,7 @@
 // src/features/missing-bikes/service.ts
 // ============================================================
 import { createClient } from '@/lib/supabase/client'
-import type { MissingBike, MissingBikeStatus } from '@/types/database'
+import type { MissingBike, MissingBikeStatus, MissingBikeWithRelations } from '@/types/models'
 
 const supabase = createClient() as any
 
@@ -12,7 +12,7 @@ const MISSING_SELECT = `
   owner:profiles!owner_id(id, username, display_name, first_name, last_name, avatar_url)
 `
 
-export async function getActiveMissingBikes(): Promise<MissingBike[]> {
+export async function getActiveMissingBikes(): Promise<MissingBikeWithRelations[]> {
   const { data } = await supabase
     .from('missing_bikes')
     .select(MISSING_SELECT)
@@ -21,7 +21,7 @@ export async function getActiveMissingBikes(): Promise<MissingBike[]> {
   return data ?? []
 }
 
-export async function getAllMissingBikes(): Promise<MissingBike[]> {
+export async function getAllMissingBikes(): Promise<MissingBikeWithRelations[]> {
   const { data } = await supabase
     .from('missing_bikes')
     .select(MISSING_SELECT)
@@ -29,7 +29,7 @@ export async function getAllMissingBikes(): Promise<MissingBike[]> {
   return data ?? []
 }
 
-export async function getMissingBikeById(id: string): Promise<MissingBike | null> {
+export async function getMissingBikeById(id: string): Promise<MissingBikeWithRelations | null> {
   const { data } = await supabase
     .from('missing_bikes')
     .select(MISSING_SELECT)
@@ -38,7 +38,7 @@ export async function getMissingBikeById(id: string): Promise<MissingBike | null
   return data
 }
 
-export async function getMyMissingReports(ownerId: string): Promise<MissingBike[]> {
+export async function getMyMissingReports(ownerId: string): Promise<MissingBikeWithRelations[]> {
   const { data } = await supabase
     .from('missing_bikes')
     .select(MISSING_SELECT)
@@ -154,7 +154,7 @@ export async function addMissingBikeComment(payload: {
   return error ? { error: error.message } : { data }
 }
 
-export async function searchMissingBikes(query: string): Promise<MissingBike[]> {
+export async function searchMissingBikes(query: string): Promise<MissingBikeWithRelations[]> {
   const { data } = await supabase
     .from('missing_bikes')
     .select(MISSING_SELECT)

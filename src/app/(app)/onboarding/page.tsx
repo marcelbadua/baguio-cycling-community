@@ -23,7 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress'
 import { Loader2, ChevronRight, ChevronLeft } from 'lucide-react'
 import { getInitials } from '@/lib/utils'
-import type { CyclistType } from '@/types/database'
+import type { CyclistType } from '@/types/models'
 
 import Link from "next/link";
 import { SITE } from "@/lib/site";

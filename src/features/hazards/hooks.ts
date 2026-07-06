@@ -7,7 +7,7 @@ import {
   createHazardReport, updateHazardStatus, deleteHazardReport,
   uploadHazardPhoto, confirmHazard, removeConfirmation, updateHazardReport,
 } from './service'
-import type { HazardStatus, HazardType } from '@/types/database'
+import type { HazardStatus, HazardType } from '@/types/models'
 
 export const hazardKeys = {
   root:   ['hazards'] as const,

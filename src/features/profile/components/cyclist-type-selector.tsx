@@ -5,7 +5,7 @@
 
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import type { CyclistType } from '@/types/database'
+import type { CyclistType } from '@/types/models'
 
 const CYCLIST_TYPE_LABELS: Record<CyclistType, string> = {
   bike_to_work:   'Bike to Work',

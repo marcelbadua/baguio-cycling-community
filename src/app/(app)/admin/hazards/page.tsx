@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import { CheckCircle2, ExternalLink, RefreshCw, Trash2 } from 'lucide-react'
 import { formatRelative, getDisplayName } from '@/lib/utils'
-import type { HazardType } from '@/types/database'
+import type { HazardType } from '@/types/models'
 
 export default function AdminHazardsPage() {
   const { toast } = useToast()
@@ -37,7 +37,7 @@ export default function AdminHazardsPage() {
         headers={['Type', 'Barangay', 'Reporter', 'Confirms', 'Status', 'Reported', '']}
         isLoading={isLoading}
         rows={(hazards ?? []).map(h => {
-          const reporter = h.reporter as any
+          const reporter = h.reporter
           const cfg      = HAZARD_TYPE_CONFIG[h.hazard_type as HazardType]
           return (
             <tr key={h.id} className={`border-b hover:bg-muted/30 ${h.is_deleted ? 'opacity-40' : ''}`}>
@@ -76,7 +76,7 @@ export default function AdminHazardsPage() {
                         size="icon"
                         className="h-7 w-7"
                         title={h.status === 'fixed' ? 'Re-open' : 'Mark Fixed'}
-                        onClick={() => handleStatus(h.id, h.status)}
+                        onClick={() => handleStatus(h.id, h.status ?? 'active')}
                       >
                         {h.status === 'fixed'
                           ? <RefreshCw className="h-3.5 w-3.5" />

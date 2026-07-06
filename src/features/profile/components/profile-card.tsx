@@ -7,7 +7,7 @@
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import type { Profile } from '@/types/database'
+import type { Profile } from '@/types/models'
 import { CYCLIST_TYPE_LABELS } from './cyclist-type-selector'
 
 interface Props { profile: Profile }
@@ -26,9 +26,9 @@ export function ProfileCard({ profile }: Props) {
         <div className="flex-1 min-w-0">
           <p className="font-medium text-sm truncate">{name}</p>
           <p className="text-xs text-muted-foreground">@{profile.username}</p>
-          {profile.cyclist_types.length > 0 && (
+          {(profile.cyclist_types?.length ?? 0) > 0 && (
             <div className="flex flex-wrap gap-1 mt-1">
-              {profile.cyclist_types.slice(0, 3).map(t => (
+              {profile.cyclist_types!.slice(0, 3).map(t => (
                 <Badge key={t} variant="secondary" className="text-[10px] px-1.5 py-0">
                   {CYCLIST_TYPE_LABELS[t]}
                 </Badge>

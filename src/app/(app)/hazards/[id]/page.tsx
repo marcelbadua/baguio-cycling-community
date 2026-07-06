@@ -50,7 +50,7 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
   if (isLoading) return <HazardDetailSkeleton />
   if (!report)   return notFound()
 
-  const reporter   = report.reporter as any
+  const reporter   = report.reporter
   const cfg        = HAZARD_TYPE_CONFIG[report.hazard_type]
   const isFixed    = report.status === 'fixed'
   const isReporter = user?.id === report.reporter_id
@@ -65,7 +65,7 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
       await confirm.mutateAsync({ userId: user.id, fixed })
       toast({
         title: fixed ? '✅ Marked as fixed — thanks!' : '👍 Confirmed as still active.',
-        description: fixed && (report.confirm_count + 1) >= 3
+        description: fixed && ((report.confirm_count ?? 0) + 1) >= 3
           ? 'Hazard has been auto-resolved after 3 fixed confirmations.'
           : undefined,
       })

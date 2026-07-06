@@ -2,7 +2,7 @@
 // src/features/events/service.ts
 // ============================================================
 import { createClient } from '@/lib/supabase/client'
-import type { Event, EventRsvp, RsvpStatus } from '@/types/database'
+import type { Event, EventRsvp, RsvpStatus, EventWithOrganizer } from '@/types/models'
 
 const supabase = createClient() as any
 
@@ -12,7 +12,7 @@ const EVENT_SELECT = `
   my_rsvp:event_rsvps(status)
 `
 
-export async function getEvents(filter: 'upcoming' | 'past' | 'all' = 'upcoming'): Promise<Event[]> {
+export async function getEvents(filter: 'upcoming' | 'past' | 'all' = 'upcoming'): Promise<EventWithOrganizer[]> {
   const today = new Date().toISOString().split('T')[0]
   let query = supabase
     .from('events')
@@ -36,7 +36,7 @@ return (data as any[]).map((e: any) => ({
   }))
 }
 
-export async function getEventById(id: string): Promise<Event | null> {
+export async function getEventById(id: string): Promise<EventWithOrganizer | null> {
   const { data: { user } } = await supabase.auth.getUser()
   const { data } = await supabase
     .from('events')
@@ -52,7 +52,7 @@ export async function getEventById(id: string): Promise<Event | null> {
   }
 }
 
-export async function getMyEvents(userId: string): Promise<Event[]> {
+export async function getMyEvents(userId: string): Promise<EventWithOrganizer[]> {
   const { data } = await supabase
     .from('events')
     .select(EVENT_SELECT)

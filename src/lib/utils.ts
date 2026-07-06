@@ -10,15 +10,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(date: string | Date) {
+export function formatDate(date: string | Date | null | undefined, fallback = '—') {
+  if (!date) return fallback
   return format(new Date(date), 'MMM d, yyyy')
 }
 
-export function formatDateTime(date: string | Date) {
+export function formatDateTime(date: string | Date | null | undefined, fallback = '—') {
+  if (!date) return fallback
   return format(new Date(date), 'MMM d, yyyy • h:mm a')
 }
 
-export function formatRelative(date: string | Date) {
+export function formatRelative(date: string | Date | null | undefined, fallback = '—') {
+  if (!date) return fallback
   return formatDistanceToNow(new Date(date), { addSuffix: true })
 }
 

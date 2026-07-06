@@ -47,8 +47,8 @@ export default function MissingBikeDetailPage({ params }: { params: Promise<{ id
   if (isLoading) return <DetailSkeleton />
   if (!report)   return notFound()
 
-  const bike      = report.bike  as any
-  const owner     = report.owner as any
+  const bike      = report.bike
+  const owner     = report.owner
   const isOwner   = user?.id === report.owner_id
   const canManage = isOwner || isAdmin
   const isActive  = report.status === 'missing'

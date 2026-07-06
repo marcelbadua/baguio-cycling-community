@@ -2,7 +2,7 @@
 // src/features/profile/service.ts
 // ============================================================
 import { createClient } from '@/lib/supabase/client'
-import type { Profile, CyclistType } from '@/types/database'
+import type { Profile, CyclistType } from '@/types/models'
 
 import { uploadToBucket } from '@/lib/supabase/upload'
 

@@ -34,7 +34,7 @@ import {
   Pencil, Trash2, UserCheck, Loader2,
 } from 'lucide-react'
 import { formatDate, formatDateTime, getInitials, getDisplayName } from '@/lib/utils'
-import type { RsvpStatus } from '@/types/database'
+import type { RsvpStatus } from '@/types/models'
 
 const DIFFICULTY_COLORS = {
   easy:     'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
@@ -62,12 +62,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   if (isLoading) return <EventDetailSkeleton />
   if (!event) return notFound()
 
-  const organizer = event.organizer as any
+  const organizer = event.organizer
   const isOrganizer = user?.id === event.organizer_id
   const canManage = isOrganizer || isAdmin
   const isPast = new Date(event.event_date) < new Date(new Date().toDateString())
   const isFull = event.max_participants
-    ? event.rsvp_going_count >= event.max_participants
+    ? (event.rsvp_going_count ?? 0) >= event.max_participants
     : false
 
   const goingAttendees = attendees?.filter(a => a.status === 'going') ?? []
@@ -286,7 +286,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           <TabsContent value="going">
             <AttendeeList
               attendees={goingAttendees}
-              showApprove={isOrganizer && event.requires_approval}
+              showApprove={isOrganizer && !!event.requires_approval}
               onApprove={uid => approveRsvp.mutate(uid)}
             />
           </TabsContent>

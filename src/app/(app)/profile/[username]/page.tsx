@@ -82,9 +82,9 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
         )}
 
         {/* Cyclist types */}
-        {profile.cyclist_types.length > 0 && (
+        {(profile.cyclist_types?.length ?? 0) > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
-            {profile.cyclist_types.map(t => (
+            {profile.cyclist_types!.map(t => (
               <Badge key={t} variant="secondary">
                 {CYCLIST_TYPE_LABELS[t]}
               </Badge>

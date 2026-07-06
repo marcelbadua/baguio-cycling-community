@@ -13,7 +13,7 @@ import {
   DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog'
 import { Bike, MoreVertical, Pencil, Trash2, AlertTriangle } from 'lucide-react'
-import type { Bike as BikeType } from '@/types/database'
+import type { Bike as BikeType } from '@/types/models'
 import { formatDate } from '@/lib/utils'
 
 interface Props {

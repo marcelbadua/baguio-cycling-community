@@ -10,12 +10,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MapPin, ThumbsUp, CheckCircle2 } from 'lucide-react'
 import { HAZARD_TYPE_CONFIG } from '../constants'
 import { formatRelative, getInitials, getDisplayName } from '@/lib/utils'
-import type { HazardReport } from '@/types/database'
+import type { HazardReportWithReporter } from '@/types/models'
 
-interface Props { report: HazardReport }
+interface Props { report: HazardReportWithReporter }
 
 export function HazardCard({ report }: Props) {
-  const reporter = report.reporter as any
+  const reporter = report.reporter
   const cfg      = HAZARD_TYPE_CONFIG[report.hazard_type]
   const isFixed  = report.status === 'fixed'
 
@@ -74,7 +74,7 @@ export function HazardCard({ report }: Props) {
                 {formatRelative(report.created_at)}
               </span>
             </div>
-            {report.confirm_count > 0 && (
+            {(report.confirm_count ?? 0) > 0 && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <ThumbsUp className="h-3.5 w-3.5" />
                 <span>{report.confirm_count}</span>

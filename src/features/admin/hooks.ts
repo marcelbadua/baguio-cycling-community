@@ -48,7 +48,7 @@ export function useSearchUsers(query: string) {
 export function useSetUserRole() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ userId, role }: { userId: string; role: import('@/types/database').UserRole }) =>
+    mutationFn: ({ userId, role }: { userId: string; role: import('@/types/models').UserRole }) =>
       setUserRole(userId, role),
     onSuccess: () => qc.invalidateQueries({ queryKey: adminKeys.usersRoot }),
   })

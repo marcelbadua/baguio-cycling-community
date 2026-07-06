@@ -7,7 +7,7 @@ import {
   deleteEvent, uploadEventCover, upsertRsvp, removeRsvp,
   getEventAttendees, approveRsvp,
 } from './service'
-import type { Event, RsvpStatus } from '@/types/database'
+import type { Event, RsvpStatus } from '@/types/models'
 
 export const eventKeys = {
   root:      ['events'] as const,

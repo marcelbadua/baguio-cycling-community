@@ -37,7 +37,7 @@ function UpcomingEventsCard() {
         ) : events && events.length > 0 ? (
           <div className="space-y-3">
             {events.slice(0, 3).map(event => {
-              const organizer = event.organizer as any
+              const organizer = event.organizer
               return (
                 <Link
                   key={event.id}
@@ -170,7 +170,7 @@ function RecentHazardsCard() {
 
                   <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
                     <span>{formatRelative(report.created_at)}</span>
-                    {report.confirm_count > 0 && (
+                    {(report.confirm_count ?? 0) > 0 && (
                       <span className="flex items-center gap-1">
                         <ThumbsUp className="h-3 w-3" />
                         {report.confirm_count}
@@ -218,7 +218,7 @@ function MissingBikesCard() {
           </div>
         ) : missingBikes?.length ? (
           missingBikes.slice(0, 3).map(report => {
-            const bike = report.bike as any
+            const bike = report.bike
             const bikeName = bike?.nickname
               ? `${bike.nickname} (${bike.brand}${bike.model ? ` ${bike.model}` : ''})`
               : `${bike?.brand ?? ''}${bike?.model ? ` ${bike.model}` : ''}`

@@ -19,7 +19,7 @@ import {
 import { useToast } from '@/components/ui/use-toast'
 import { MoreHorizontal, Pin, PinOff, Trash2, ImageIcon } from 'lucide-react'
 import { formatDate, getInitials, getDisplayName } from '@/lib/utils'
-import type { Post } from '@/types/database'
+import type { PostWithAuthor } from '@/types/models'
 
 const POST_TYPE_COLORS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   text:             'outline',
@@ -33,7 +33,7 @@ export default function AdminPostsPage() {
   const { toast } = useToast()
   const qc = useQueryClient()
   const [page, setPage] = useState(0)
-  const [confirmDelete, setConfirmDelete] = useState<Post | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<PostWithAuthor | null>(null)
 
   const { data: posts, isLoading } = useQuery({
     queryKey: ['admin', 'posts', page],
@@ -74,7 +74,7 @@ export default function AdminPostsPage() {
         headers={['Author', 'Content', 'Type', 'Stats', 'Date', '']}
         isLoading={isLoading}
         rows={displayed.map(post => {
-          const author = post.author as any
+          const author = post.author
           return (
             <tr key={post.id} className="border-b hover:bg-muted/30">
               {/* Author */}
@@ -109,10 +109,10 @@ export default function AdminPostsPage() {
               {/* Type */}
               <td className="px-4 py-3">
                 <Badge
-                  variant={POST_TYPE_COLORS[post.post_type] ?? 'outline'}
+                  variant={POST_TYPE_COLORS[post.post_type ?? ''] ?? 'outline'}
                   className="text-xs capitalize whitespace-nowrap"
                 >
-                  {post.post_type.replace(/_/g, ' ')}
+                  {(post.post_type ?? '').replace(/_/g, ' ')}
                 </Badge>
               </td>
 
@@ -181,7 +181,7 @@ export default function AdminPostsPage() {
             <DialogTitle>Delete Post</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete this post by{' '}
-              <strong>{getDisplayName(confirmDelete?.author as any)}</strong>?
+              <strong>{getDisplayName(confirmDelete?.author)}</strong>?
               {confirmDelete?.content && (
                 <span className="block mt-2 text-sm italic line-clamp-3">
                   "{confirmDelete.content}"

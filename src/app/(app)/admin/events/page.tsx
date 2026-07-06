@@ -26,7 +26,7 @@ export default function AdminEventsPage() {
         headers={['Title', 'Organizer', 'Date', 'Going', 'Status', '']}
         isLoading={isLoading}
         rows={(events ?? []).map(e => {
-          const organizer = e.organizer as any
+          const organizer = e.organizer
           const isPast    = new Date(e.event_date) < new Date()
           return (
             <tr key={e.id} className={`border-b hover:bg-muted/30 ${e.is_deleted ? 'opacity-40' : ''}`}>

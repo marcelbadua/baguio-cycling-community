@@ -24,7 +24,7 @@ import {
   MoreHorizontal, Bike, Calendar, ThumbsUp,
 } from 'lucide-react'
 import { formatRelative, getInitials, getDisplayName, cn } from '@/lib/utils'
-import type { Post } from '@/types/database'
+import type { PostWithAuthor } from '@/types/models'
 
 // ── Post Type Badge ───────────────────────────────────────────
 const TYPE_CONFIG: Record<string, { label: string; icon: ReactNode; badge: string }> = {
@@ -34,7 +34,7 @@ const TYPE_CONFIG: Record<string, { label: string; icon: ReactNode; badge: strin
 }
 
 // ── Post Card ─────────────────────────────────────────────────
-export function PostCard({ post }: { post: Post }) {
+export function PostCard({ post }: { post: PostWithAuthor }) {
 
   const router = useRouter()
 
@@ -47,7 +47,14 @@ export function PostCard({ post }: { post: Post }) {
   const [commentText, setCommentText] = useState('')
   const [showMenu, setShowMenu] = useState(false)
 
-  const author = post.author as any
+  // Normalized once here instead of null-checking every usage below —
+  // the real generated types correctly mark these nullable even though
+  // the DB always defaults them to 0/[].
+  const photos = post.photos ?? []
+  const likeCount = post.like_count ?? 0
+  const commentCount = post.comment_count ?? 0
+
+  const author = post.author
   const authorName = author ? getDisplayName(author) : 'Unknown'
   const authorInitials = author ? getInitials(author.first_name, author.last_name) : '?'
   const isOwner = user?.id === post.author_id
@@ -56,7 +63,7 @@ export function PostCard({ post }: { post: Post }) {
     router.push('/login')
   }
 
-  const typeCfg = TYPE_CONFIG[post.post_type]
+  const typeCfg = TYPE_CONFIG[post.post_type ?? '']
 
   const handleComment = async (e: FormEvent) => {
     e.preventDefault()
@@ -132,10 +139,10 @@ export function PostCard({ post }: { post: Post }) {
         )}
 
         {/* Photos */}
-        {post.photos && post.photos.length > 0 && (
-          <div className={`grid gap-0.5 ${post.photos.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-            {post.photos.slice(0, 4).map((src, i) => (
-              <div key={i} className={`relative overflow-hidden bg-muted ${post.photos.length === 1 ? 'aspect-video' : 'aspect-square'}`}>
+        {photos.length > 0 && (
+          <div className={`grid gap-0.5 ${photos.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            {photos.slice(0, 4).map((src, i) => (
+              <div key={i} className={`relative overflow-hidden bg-muted ${photos.length === 1 ? 'aspect-video' : 'aspect-square'}`}>
 
                 <div
                   onClick={() => setLightboxIndex(i)}
@@ -148,9 +155,9 @@ export function PostCard({ post }: { post: Post }) {
                   />
                 </div>
 
-                {i === 3 && post.photos.length > 4 && (
+                {i === 3 && photos.length > 4 && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span className="text-white text-xl font-bold">+{post.photos.length - 4}</span>
+                    <span className="text-white text-xl font-bold">+{photos.length - 4}</span>
                   </div>
                 )}
               </div>
@@ -175,9 +182,9 @@ export function PostCard({ post }: { post: Post }) {
         )}
 
         {/* Stats row */}
-        {(post.like_count > 0 || post.comment_count > 0) && (
+        {(likeCount > 0 || commentCount > 0) && (
           <div className="flex items-center justify-between px-4 py-1.5 border-t border-b mx-0">
-            {post.like_count > 0 && (
+            {likeCount > 0 && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <div className="flex -space-x-0.5">
                   <div className="h-4 w-4 rounded-full bg-primary flex items-center justify-center">
@@ -187,12 +194,12 @@ export function PostCard({ post }: { post: Post }) {
                     <Heart className="h-2.5 w-2.5 text-white fill-white" />
                   </div>
                 </div>
-                <span>{post.like_count}</span>
+                <span>{likeCount}</span>
               </div>
             )}
-            {post.comment_count > 0 && (
+            {commentCount > 0 && (
               <button onClick={() => setShowComments(v => !v)} className="text-xs text-muted-foreground hover:underline ml-auto">
-                {post.comment_count} comment{post.comment_count !== 1 ? 's' : ''}
+                {commentCount} comment{commentCount !== 1 ? 's' : ''}
               </button>
             )}
           </div>
@@ -352,21 +359,21 @@ export function PostCard({ post }: { post: Post }) {
           </div>
         )}
 
-        {lightboxIndex !== null && post.photos && (
+        {lightboxIndex !== null && photos.length > 0 && (
           <ImageLightbox
-            images={post.photos}
+            images={photos}
             index={lightboxIndex}
             onClose={() => setLightboxIndex(null)}
             onNext={() =>
               setLightboxIndex((i) =>
-                i === null ? 0 : (i + 1) % post.photos.length
+                i === null ? 0 : (i + 1) % photos.length
               )
             }
             onPrev={() =>
               setLightboxIndex((i) =>
                 i === null
                   ? 0
-                  : (i - 1 + post.photos.length) % post.photos.length
+                  : (i - 1 + photos.length) % photos.length
               )
             }
           />

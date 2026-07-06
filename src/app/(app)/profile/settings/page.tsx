@@ -18,7 +18,7 @@ import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/components/ui/use-toast'
 import { LoadingSpinner } from '@/components/loading-spinner'
 import { Loader2 } from 'lucide-react'
-import type { CyclistType } from '@/types/database'
+import type { CyclistType } from '@/types/models'
 
 import { BARANGAYS } from "@/lib/constants/barangays"
 

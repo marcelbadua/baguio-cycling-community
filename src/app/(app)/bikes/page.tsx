@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/sheet'
 import { useToast } from '@/components/ui/use-toast'
 import { Plus, Bike } from 'lucide-react'
-import type { Bike as BikeType } from '@/types/database'
+import type { Bike as BikeType } from '@/types/models'
 import { useRouter } from 'next/navigation'
 
 export default function BikesPage() {
