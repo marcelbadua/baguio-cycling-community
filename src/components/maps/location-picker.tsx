@@ -9,9 +9,16 @@ import {
   useMapEvents,
 } from 'react-leaflet'
 
-import L from './leaflet-icon'
+import L from 'leaflet'
 
-import 'leaflet/dist/leaflet.css'
+const markerIcon = new L.Icon({
+  iconUrl: '/leaflet/marker-icon.png',
+  iconRetinaUrl: '/leaflet/marker-icon-2x.png',
+  shadowUrl: '/leaflet/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+})
 
 interface Props {
   latitude?: number
@@ -95,7 +102,7 @@ export function LocationPicker({
                 onChange(pos.lat, pos.lng)
               },
             }}
-            icon={new L.Icon.Default()}
+            icon={markerIcon}
           />
         )}
       </MapContainer>

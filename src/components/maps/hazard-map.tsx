@@ -1,14 +1,16 @@
 'use client'
 
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 
-const marker = new L.Icon({
+import L from 'leaflet'
+
+const markerIcon = new L.Icon({
   iconUrl: '/leaflet/marker-icon.png',
+  iconRetinaUrl: '/leaflet/marker-icon-2x.png',
   shadowUrl: '/leaflet/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
 })
 
 interface Props {
@@ -43,7 +45,7 @@ export function HazardMap({
 
         <Marker
           position={[latitude, longitude]}
-          icon={new L.Icon.Default()}
+            icon={markerIcon}
         >
           <Popup>{title}</Popup>
         </Marker>
