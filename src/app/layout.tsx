@@ -14,6 +14,8 @@ import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Footer } from "@/components/layout/footer";
 
+import 'maplibre-gl/dist/maplibre-gl.css'
+
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 export const metadata: Metadata = {
   metadataBase: new URL("https://baguio-cycling-community.vercel.app"),

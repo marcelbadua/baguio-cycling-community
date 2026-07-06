@@ -33,8 +33,8 @@ import { formatDate, formatRelative, getInitials, getDisplayName } from '@/lib/u
 
 import dynamic from 'next/dynamic'
 
-const HazardMap = dynamic(
-  () => import('@/components/maps/HazardMap').then(mod => mod.HazardMap),
+const Map = dynamic(
+  () => import('@/components/maps/Map').then(mod => mod.Map),
   {
     ssr: false,
   }
@@ -185,7 +185,7 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
 
 
 
-      {report.latitude && report.longitude && (
+      {report.latitude != null && report.longitude != null && (
         <>
           <Separator />
 
@@ -194,7 +194,7 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
               Location
             </h2>
 
-            <HazardMap
+            <Map
               latitude={report.latitude}
               longitude={report.longitude}
               title={report.landmark || report.barangay}
