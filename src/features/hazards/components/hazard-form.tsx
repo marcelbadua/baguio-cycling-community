@@ -21,7 +21,20 @@ import {
 } from 'lucide-react'
 import type { HazardType } from '@/types/models'
 import { Input } from '@/components/ui/input'
-import { LocationPicker } from '@/components/maps/location-picker'
+import dynamic from 'next/dynamic'
+
+const LocationPicker = dynamic(
+  () =>
+    import('@/components/maps/LocationPicker').then(
+      (m) => m.LocationPicker
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[350px] rounded-xl border bg-muted animate-pulse" />
+    ),
+  }
+)
 
 const hazardSchema = z.object({
   hazard_type: z.enum([

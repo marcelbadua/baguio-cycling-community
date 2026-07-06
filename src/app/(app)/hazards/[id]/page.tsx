@@ -34,7 +34,7 @@ import { formatDate, formatRelative, getInitials, getDisplayName } from '@/lib/u
 import dynamic from 'next/dynamic'
 
 const HazardMap = dynamic(
-  () => import('@/components/maps/hazard-map').then(mod => mod.HazardMap),
+  () => import('@/components/maps/HazardMap').then(mod => mod.HazardMap),
   {
     ssr: false,
   }
