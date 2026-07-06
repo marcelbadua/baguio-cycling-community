@@ -53,13 +53,17 @@ export default function HazardsPage() {
     }
 
     const result = await createReport.mutateAsync({
-      reporter_id: user.id,
-      hazard_type: data.hazard_type,
-      barangay:    data.barangay,
-      landmark:    data.landmark || undefined,
-      description: data.description,
-      photo_url,
-    })
+  reporter_id: user.id,
+  hazard_type: data.hazard_type,
+  barangay: data.barangay,
+  landmark: data.landmark || undefined,
+  description: data.description,
+
+  latitude: data.latitude,
+  longitude: data.longitude,
+
+  photo_url,
+})
 
     if (result.error) {
       toast({ title: 'Error', description: result.error, variant: 'destructive' })

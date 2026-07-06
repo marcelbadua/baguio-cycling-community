@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
   title: {
     default: "Baguio Cycling Community",
-    template: "%s | BCC",
+    template: "%s",
   },
 
   description:

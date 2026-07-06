@@ -13,34 +13,98 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { HazardTypePicker } from './hazard-type-picker'
 import { BARANGAYS } from "@/lib/constants/barangays"
-import { Upload, X, Loader2 } from 'lucide-react'
+import {
+  Upload,
+  X,
+  Loader2,
+  MapPin,
+} from 'lucide-react'
 import type { HazardType } from '@/types/models'
 import { Input } from '@/components/ui/input'
+import { LocationPicker } from '@/components/maps/location-picker'
 
 const hazardSchema = z.object({
   hazard_type: z.enum([
-    'pothole','open_manhole','broken_glass','construction','landslide','flood','other',
-  ] as const, { message: 'Please select a hazard type' }),
-  barangay:    z.string().min(1, 'Barangay is required'),
-  landmark:    z.string().optional(),
-  description: z.string().min(5, 'Please describe the hazard (min 5 characters)'),
+    'pothole',
+    'open_manhole',
+    'broken_glass',
+    'drainage_grill',
+    'construction',
+    'landslide',
+    'flood',
+    'other',
+  ] as const, {
+    message: 'Please select a hazard type',
+  }),
+
+  barangay: z.string().min(1, 'Barangay is required'),
+
+  landmark: z.string().optional(),
+
+  description: z.string().min(
+    5,
+    'Please describe the hazard (min 5 characters)'
+  ),
+
+  latitude: z.number().optional(),
+
+  longitude: z.number().optional(),
 })
 
 export type HazardFormData = z.infer<typeof hazardSchema>
 
 interface Props {
-  onSubmit: (data: HazardFormData, photoFile?: File) => Promise<void>
+  initialValues?: Partial<HazardFormData>
+
+  initialPhoto?: string
+
+  submitLabel?: string
+
+  onSubmit: (
+    data: HazardFormData,
+    photoFile?: File
+  ) => Promise<void>
+
   isPending?: boolean
 }
 
-export function HazardForm({ onSubmit, isPending }: Props) {
+export function HazardForm({
+  initialValues,
+  initialPhoto,
+  submitLabel,
+  onSubmit,
+  isPending,
+}: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [preview, setPreview] = useState<string | null>(null)
+  const [preview, setPreview] =
+  useState<string | null>(
+    initialPhoto ?? null
+  )
 
-  const { control, register, handleSubmit, formState: { errors }, watch } = useForm<HazardFormData>({
+  const {
+    control,
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<HazardFormData>({
     resolver: zodResolver(hazardSchema),
+
+    defaultValues: {
+      hazard_type: initialValues?.hazard_type,
+      barangay: initialValues?.barangay ?? '',
+      landmark: initialValues?.landmark ?? '',
+      description: initialValues?.description ?? '',
+
+      latitude: initialValues?.latitude,
+      longitude: initialValues?.longitude,
+    },
   })
+
+  const latitude = watch('latitude')
+  const longitude = watch('longitude')
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -94,6 +158,50 @@ export function HazardForm({ onSubmit, isPending }: Props) {
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
       </div>
 
+      <div className="space-y-3">
+
+        <div className="flex items-center justify-between">
+          <Label className="flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            Exact Location
+          </Label>
+
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                  setValue('latitude', pos.coords.latitude)
+                  setValue('longitude', pos.coords.longitude)
+                },
+                () => {
+                  alert('Unable to get your current location.')
+                }
+              )
+            }}
+          >
+            📍 Use My Location
+          </Button>
+        </div>
+
+        <LocationPicker
+          latitude={latitude}
+          longitude={longitude}
+          onChange={(lat, lng) => {
+            setValue('latitude', lat)
+            setValue('longitude', lng)
+          }}
+        />
+
+        {latitude && longitude && (
+          <p className="text-xs text-muted-foreground">
+            {latitude.toFixed(6)}, {longitude.toFixed(6)}
+          </p>
+        )}
+      </div>
+
       {/* Barangay */}
       <div className="space-y-1">
         <Label>Barangay *</Label>
@@ -104,7 +212,7 @@ export function HazardForm({ onSubmit, isPending }: Props) {
             <select
               {...field}
               className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
->
+            >
               <option value="" className="bg-background text-foreground">Select barangay...</option>
               {BARANGAYS.map(b => <option key={b} value={b}>{b}</option>)}
             </select>
@@ -137,9 +245,18 @@ export function HazardForm({ onSubmit, isPending }: Props) {
       </div>
 
       <Button type="submit" className="w-full gap-2" disabled={isPending}>
-        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : '⚠️'}
-        {isPending ? 'Submitting...' : 'Submit Hazard Report'}
-      </Button>
+  {isPending ? (
+    <>
+      <Loader2 className="h-4 w-4 animate-spin" />
+      Submitting...
+    </>
+  ) : (
+    <>
+      ⚠️
+      {submitLabel ?? 'Submit Hazard Report'}
+    </>
+  )}
+</Button>
     </form>
   )
 }

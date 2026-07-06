@@ -3,6 +3,7 @@
 import { use, useState } from 'react'
 import { notFound, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { HazardForm, type HazardFormData } from '@/features/hazards/components/hazard-form'
 import {
   useHazardById, useConfirmHazard,
   useUpdateHazardStatus, useDeleteHazardReport, useUpdateHazardReport,
@@ -13,20 +14,31 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
-  Dialog, DialogContent, DialogHeader,
-  DialogTitle, DialogDescription, DialogFooter,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet'
 import { useToast } from '@/components/ui/use-toast'
 import {
   ArrowLeft, MapPin, Calendar, ThumbsUp,
   CheckCircle2, Trash2, Loader2, AlertTriangle, ShieldCheck, Pencil,
 } from 'lucide-react'
 import { formatDate, formatRelative, getInitials, getDisplayName } from '@/lib/utils'
+
+import dynamic from 'next/dynamic'
+
+const HazardMap = dynamic(
+  () => import('@/components/maps/hazard-map').then(mod => mod.HazardMap),
+  {
+    ssr: false,
+  }
+)
 
 export default function HazardDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -35,26 +47,27 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
   const router = useRouter()
 
   const { data: report, isLoading } = useHazardById(id)
-  const { confirm, remove }         = useConfirmHazard(id)
-  const updateStatus                = useUpdateHazardStatus()
-  const deleteReport                = useDeleteHazardReport()
-  const updateReport                = useUpdateHazardReport()
+  const { confirm, remove } = useConfirmHazard(id)
+  const updateStatus = useUpdateHazardStatus()
+  const deleteReport = useDeleteHazardReport()
+  const updateReport = useUpdateHazardReport()
 
   const [deleteConfirm, setDeleteConfirm] = useState(false)
-  const [lightbox, setLightbox]           = useState(false)
-  const [editing, setEditing]             = useState(false)
-  const [editBarangay, setEditBarangay]   = useState('')
-  const [editLandmark, setEditLandmark]   = useState('')
-  const [editDescription, setEditDescription] = useState('')
+  const [lightbox, setLightbox] = useState(false)
+  const [editing, setEditing] = useState(false)
+
+  const handleEditOpen = () => {
+    setEditing(true)
+  }
 
   if (isLoading) return <HazardDetailSkeleton />
-  if (!report)   return notFound()
+  if (!report) return notFound()
 
-  const reporter   = report.reporter
-  const cfg        = HAZARD_TYPE_CONFIG[report.hazard_type]
-  const isFixed    = report.status === 'fixed'
+  const reporter = report.reporter
+  const cfg = HAZARD_TYPE_CONFIG[report.hazard_type]
+  const isFixed = report.status === 'fixed'
   const isReporter = user?.id === report.reporter_id
-  const canManage  = isReporter || isAdmin
+  const canManage = isReporter || isAdmin
 
   const handleConfirm = async (fixed: boolean) => {
     if (!user) return
@@ -82,30 +95,6 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
     await deleteReport.mutateAsync(id)
     toast({ title: 'Hazard report deleted.' })
     router.push('/hazards')
-  }
-
-  const handleEditOpen = () => {
-    setEditBarangay(report.barangay ?? '')
-    setEditLandmark(report.landmark ?? '')
-    setEditDescription(report.description ?? '')
-    setEditing(true)
-  }
-
-  const handleEditSave = async () => {
-    const result = await updateReport.mutateAsync({
-      id,
-      updates: {
-        barangay:    editBarangay.trim(),
-        landmark:    editLandmark.trim() || undefined,
-        description: editDescription.trim() || undefined,
-      },
-    })
-    if (result?.error) {
-      toast({ title: 'Error', description: result.error, variant: 'destructive' })
-    } else {
-      toast({ title: 'Hazard report updated.' })
-      setEditing(false)
-    }
   }
 
   const confirmPending = confirm.isPending || remove.isPending
@@ -193,6 +182,43 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
           </span>
         </div>
       </div>
+
+
+
+      {report.latitude && report.longitude && (
+        <>
+          <Separator />
+
+          <div className="space-y-3">
+            <h2 className="font-semibold">
+              Location
+            </h2>
+
+            <HazardMap
+              latitude={report.latitude}
+              longitude={report.longitude}
+              title={report.landmark || report.barangay}
+            />
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+              >
+                <a
+                  href={`https://www.google.com/maps?q=${report.latitude},${report.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Open in Google Maps
+                </a>
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Description */}
       {report.description && (
@@ -291,75 +317,70 @@ export default function HazardDetailPage({ params }: { params: Promise<{ id: str
       )}
 
       {/* Edit Dialog */}
-      <Dialog open={editing} onOpenChange={open => !open && setEditing(false)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Hazard Report</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>Barangay</Label>
-              <Input
-                value={editBarangay}
-                onChange={e => setEditBarangay(e.target.value)}
-                placeholder="Barangay name"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Landmark <span className="text-muted-foreground text-xs">(optional)</span></Label>
-              <Input
-                value={editLandmark}
-                onChange={e => setEditLandmark(e.target.value)}
-                placeholder="Nearest landmark"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Description <span className="text-muted-foreground text-xs">(optional)</span></Label>
-              <textarea
-                value={editDescription}
-                onChange={e => setEditDescription(e.target.value)}
-                rows={4}
-                className="w-full rounded-md border bg-muted/50 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring"
-                placeholder="Describe the hazard..."
-              />
-            </div>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
-            <Button
-              onClick={handleEditSave}
-              disabled={updateReport.isPending || !editBarangay.trim()}
-            >
-              {updateReport.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      {/* Delete Confirm */}
-      <Dialog open={deleteConfirm} onOpenChange={setDeleteConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Hazard Report</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this hazard report for{' '}
-              <strong>{report.barangay}</strong>? This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDeleteConfirm(false)}>Cancel</Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleteReport.isPending}
-            >
-              {deleteReport.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <Sheet
+        open={editing}
+        onOpenChange={setEditing}
+      >
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-lg overflow-y-auto"
+        >
+          <SheetHeader className="mb-6">
+            <SheetTitle>Edit Hazard</SheetTitle>
+
+            <SheetDescription>
+              Update this hazard report.
+            </SheetDescription>
+          </SheetHeader>
+
+          <HazardForm
+            initialValues={{
+              hazard_type: report.hazard_type,
+              barangay: report.barangay,
+              landmark: report.landmark ?? '',
+              description: report.description ?? '',
+              latitude: report.latitude ?? undefined,
+              longitude: report.longitude ?? undefined,
+            }}
+            initialPhoto={report.photo_url ?? undefined}
+            submitLabel="Save Changes"
+            isPending={updateReport.isPending}
+            onSubmit={async (data, photoFile) => {
+              const result = await updateReport.mutateAsync({
+                id,
+                updates: {
+                  hazard_type: data.hazard_type,
+                  barangay: data.barangay,
+                  landmark: data.landmark || undefined,
+                  description: data.description,
+
+                  latitude: data.latitude,
+                  longitude: data.longitude,
+
+                  // later
+                  // photo_url
+                },
+              })
+
+              if (result?.error) {
+                toast({
+                  title: 'Error',
+                  description: result.error,
+                  variant: 'destructive',
+                })
+                return
+              }
+
+              toast({
+                title: 'Hazard updated.',
+              })
+
+              setEditing(false)
+            }}
+          />
+        </SheetContent>
+      </Sheet>
 
       {/* Lightbox */}
       {lightbox && report.photo_url && (

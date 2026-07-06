@@ -108,6 +108,8 @@ export async function createHazardReport(payload: {
   barangay: string
   landmark?: string
   description?: string
+  latitude?: number
+  longitude?: number
   photo_url?: string
 }): Promise<{ data?: HazardReport; error?: string }> {
   const { data, error } = await supabase
@@ -220,11 +222,23 @@ export async function removeConfirmation(
 
 export async function updateHazardReport(
   id: string,
-  updates: { description?: string; landmark?: string; barangay?: string }
+  updates: {
+    hazard_type?: HazardType
+    barangay?: string
+    landmark?: string
+    description?: string
+    latitude?: number
+    longitude?: number
+    photo_url?: string
+  }
 ): Promise<{ error?: string }> {
   const { error } = await supabase
     .from('hazard_reports')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', id)
+
   return error ? { error: error.message } : {}
 }

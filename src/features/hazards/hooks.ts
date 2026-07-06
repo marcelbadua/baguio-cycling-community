@@ -97,7 +97,21 @@ export function useConfirmHazard(hazardId: string) {
 export function useUpdateHazardReport() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: { description?: string; landmark?: string; barangay?: string } }) =>
+    mutationFn: ({
+  id,
+  updates,
+}: {
+  id: string
+  updates: {
+    hazard_type?: HazardType
+    barangay?: string
+    landmark?: string
+    description?: string
+    latitude?: number
+    longitude?: number
+    photo_url?: string
+  }
+}) =>
       updateHazardReport(id, updates),
     onSuccess: () => qc.invalidateQueries({ queryKey: hazardKeys.root }),
   })
