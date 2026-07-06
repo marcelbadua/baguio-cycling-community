@@ -1,6 +1,11 @@
 'use client'
 
-import { useState, type ReactNode, type FormEvent } from 'react'
+import {
+  useState,
+  useEffect,
+  type ReactNode,
+  type FormEvent,
+} from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/features/auth/hooks'
 
@@ -13,12 +18,16 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-import { useRouter } from 'next/navigation'
+import {
+  useRouter,
+  useSearchParams,
+} from 'next/navigation'
 
 import { ImageLightbox } from '@/components/media/image-lightbox'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { RichText } from '@/components/common/RichText'
 import {
   Heart, MessageCircle, Share2, Loader2, Pin,
   MoreHorizontal, Bike, Calendar, ThumbsUp,
@@ -34,9 +43,27 @@ const TYPE_CONFIG: Record<string, { label: string; icon: ReactNode; badge: strin
 }
 
 // ── Post Card ─────────────────────────────────────────────────
-export function PostCard({ post }: { post: PostWithAuthor }) {
+interface PostCardProps {
+  post: PostWithAuthor
+  fullPost?: boolean
+}
+
+export function PostCard({
+  post,
+  fullPost = false,
+}: PostCardProps) {
 
   const router = useRouter()
+
+  const searchParams = useSearchParams()
+
+  const photoParam = searchParams.get('photo')
+
+  const initialPhotoIndex =
+    photoParam !== null &&
+      !Number.isNaN(Number(photoParam))
+      ? Number(photoParam)
+      : null
 
   const { user, profile, isAdmin } = useAuth()
   const toggleLike = useToggleLike()
@@ -53,6 +80,16 @@ export function PostCard({ post }: { post: PostWithAuthor }) {
   const photos = post.photos ?? []
   const likeCount = post.like_count ?? 0
   const commentCount = post.comment_count ?? 0
+
+  const MAX_EXCERPT = 220
+
+  const isLong =
+    (post.content?.length ?? 0) > MAX_EXCERPT
+
+  const content =
+    fullPost || !isLong
+      ? post.content ?? ''
+      : post.content!.slice(0, MAX_EXCERPT) + '...'
 
   const author = post.author
   const authorName = author ? getDisplayName(author) : 'Unknown'
@@ -72,7 +109,14 @@ export function PostCard({ post }: { post: PostWithAuthor }) {
     setCommentText('')
   }
 
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [lightboxIndex, setLightboxIndex] =
+    useState<number | null>(initialPhotoIndex)
+
+  useEffect(() => {
+    if (fullPost) {
+      setLightboxIndex(initialPhotoIndex)
+    }
+  }, [initialPhotoIndex, fullPost])
 
   const [showAllComments, setShowAllComments] = useState(false)
 
@@ -82,7 +126,10 @@ export function PostCard({ post }: { post: PostWithAuthor }) {
     ? commentsPreview
     : commentsPreview.slice(0, 2)
 
+
   return (
+
+
     <Card className={cn('overflow-hidden', post.is_pinned && 'ring-1 ring-primary/40')}>
       <CardContent className="p-0">
         {/* Pinned / type banner */}
@@ -128,14 +175,26 @@ export function PostCard({ post }: { post: PostWithAuthor }) {
 
         {/* Content */}
         {post.content && (
-          <Link
-            href={`/posts/${post.id}`}
-            className="block hover:bg-muted/30 transition-colors"
-          >
-            <p className="px-4 pb-3 text-sm leading-relaxed whitespace-pre-line cursor-pointer">
-              {post.content}
-            </p>
-          </Link>
+          fullPost ? (
+            <div className="px-4 pb-3 text-sm leading-relaxed whitespace-pre-line">
+              <RichText text={content} />
+            </div>
+          ) : (
+            <Link
+              href={`/posts/${post.id}`}
+              className="block hover:bg-muted/30 transition-colors"
+            >
+              <div className="px-4 pb-3 text-sm leading-relaxed whitespace-pre-line">
+                <RichText text={content} />
+
+                {isLong && (
+                  <span className="text-primary font-medium">
+                    {' '}Show more →
+                  </span>
+                )}
+              </div>
+            </Link>
+          )
         )}
 
         {/* Photos */}
@@ -145,7 +204,13 @@ export function PostCard({ post }: { post: PostWithAuthor }) {
               <div key={i} className={`relative overflow-hidden bg-muted ${photos.length === 1 ? 'aspect-video' : 'aspect-square'}`}>
 
                 <div
-                  onClick={() => setLightboxIndex(i)}
+                  onClick={() => {
+                    if (fullPost) {
+                      setLightboxIndex(i)
+                    } else {
+                      router.push(`/posts/${post.id}?photo=${i}`)
+                    }
+                  }}
                   className="cursor-pointer w-full h-full"
                 >
                   <img
@@ -154,6 +219,7 @@ export function PostCard({ post }: { post: PostWithAuthor }) {
                     alt=""
                   />
                 </div>
+
 
                 {i === 3 && photos.length > 4 && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -363,7 +429,15 @@ export function PostCard({ post }: { post: PostWithAuthor }) {
           <ImageLightbox
             images={photos}
             index={lightboxIndex}
-            onClose={() => setLightboxIndex(null)}
+            onClose={() => {
+              setLightboxIndex(null)
+
+              if (fullPost) {
+                router.replace(`/posts/${post.id}`, {
+                  scroll: false,
+                })
+              }
+            }}
             onNext={() =>
               setLightboxIndex((i) =>
                 i === null ? 0 : (i + 1) % photos.length

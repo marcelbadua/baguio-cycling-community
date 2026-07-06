@@ -1,5 +1,7 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
+
 import { usePostById } from '@/features/feed/hooks'
 import { PostCard } from '@/features/feed/components/feed-post-card'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,10 +11,17 @@ interface Props {
   id: string
 }
 
-export default function PostPage({
-  id,
-}: Props) {
+export default function PostPage({ id }: Props) {
+  const searchParams = useSearchParams()
+
   const { data: post, isLoading } = usePostById(id)
+
+  const photoParam = searchParams.get('photo')
+
+  const initialPhotoIndex =
+    photoParam !== null && !Number.isNaN(Number(photoParam))
+      ? Number(photoParam)
+      : null
 
   if (isLoading) {
     return (
@@ -44,7 +53,10 @@ export default function PostPage({
 
   return (
     <div className="max-w-2xl mx-auto py-6">
-      <PostCard post={post} />
+      <PostCard
+        post={post}
+        fullPost
+      />
     </div>
   )
 }
