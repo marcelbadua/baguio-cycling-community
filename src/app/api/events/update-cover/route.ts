@@ -1,10 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabase = await createServerSupabaseClient()
-
-const table = supabase.from('events')
-
 export async function POST(req: NextRequest) {
   let body: { eventId?: string; coverUrl?: string }
   try {
@@ -19,9 +15,11 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.from('events').update({
-      cover_url: coverUrl ?? null,
-    } as any)
+  const { error } = await supabase
+    .from('events')
+    .update({ cover_url: coverUrl ?? null } as any)
+    .eq('id', eventId)
+
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
