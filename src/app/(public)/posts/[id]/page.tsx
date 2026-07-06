@@ -1,47 +1,90 @@
-'use client'
+import type { Metadata } from 'next'
+import PostPage from './PostPage'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 
-import { useParams } from 'next/navigation'
-import { usePostById } from '@/features/feed/hooks'
-import { PostCard } from '@/features/feed/components/feed-post-card'
-import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+type Props = {
+  params: Promise<{
+    id: string
+  }>
+}
 
-export default function PostPage() {
-  const { id } = useParams<{ id: string }>()
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { id } = await params
 
-  const { data: post, isLoading } = usePostById(id)
+  const supabase = await createServerSupabaseClient()
 
-  if (isLoading) {
-    return (
-      <div className="max-w-2xl mx-auto py-6">
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <Skeleton className="h-10 w-40" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-72 w-full rounded-lg" />
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+  const { data: post } = await supabase
+    .from('posts')
+    .select(`
+      *,
+      author:profiles!author_id(
+        id,
+        username,
+        display_name,
+        first_name,
+        last_name,
+        avatar_url
+      )
+    `)
+    .eq('id', id)
+    .eq('is_deleted', false)
+    .single()
 
   if (!post) {
-    return (
-      <div className="max-w-xl mx-auto py-20 text-center">
-        <h1 className="text-2xl font-bold">
-          Post not found
-        </h1>
-
-        <p className="text-muted-foreground mt-2">
-          This post may have been deleted.
-        </p>
-      </div>
-    )
+    return {
+      title: 'Post | Baguio Cycling Community',
+      description: 'Community cycling post.',
+    }
   }
 
-  return (
-    <div className="max-w-2xl mx-auto py-6">
-      <PostCard post={post} />
-    </div>
-  )
+  const author =
+    post.author?.display_name ||
+    post.author?.username ||
+    'Cyclist'
+
+  const description =
+    post.content?.trim().slice(0, 160) ||
+    'Shared a post on Baguio Cycling Community.'
+
+  const image =
+    Array.isArray(post.photos) && post.photos.length > 0
+      ? post.photos[0]
+      : '/og-default.jpg'
+
+  return {
+    title: `${author} • Baguio Cycling Community`,
+    description,
+
+    openGraph: {
+      title: `${author} • Baguio Cycling Community`,
+      description,
+      url: `https://baguio-cycling-community.vercel.app/posts/${id}`,
+      siteName: 'Baguio Cycling Community',
+      type: 'article',
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+
+    twitter: {
+      card: 'summary_large_image',
+      title: `${author} • Baguio Cycling Community`,
+      description,
+      images: [image],
+    },
+  }
+}
+
+export default async function Page({
+  params,
+}: Props) {
+  const { id } = await params
+
+  return <PostPage id={id} />
 }
